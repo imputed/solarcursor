@@ -1,0 +1,9 @@
+---
+description: Regeln für die Auslagerung der Dependency Injection
+globs: **/DependencyInjection/*.cs, **/Extensions/*.cs
+---
+# DI Composition Root Standards
+
+- **Project**: Nutze das Projekt `SolarTracker.IoC` als zentralen Punkt für Service-Registrierungen.
+- **Extensions**: Implementiere `public static IServiceCollection AddSolarInfrastructure(this IServiceCollection services, IConfiguration config)`.
+- **Encapsulation**: Das IoC-Projekt ist das einzige, das Infrastructure referenziert.

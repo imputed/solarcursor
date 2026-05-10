@@ -1,0 +1,10 @@
+---
+description: Regeln für direkte, wartbare Architektur ohne MediatR/Events
+globs: **/*.cs
+---
+# Pragmatic Architecture Rules
+
+- **No Mediator/Events**: Implementiere Logik direkt in Services oder Minimal API Handlern. Folgeaktionen werden sequentiell ausgeführt.
+- **Persistence**: Nutze `int` als Primary Key (`Id`) mit Identity Columns.
+- **Simplicity**: Bevorzuge Lesbarkeit vor komplexen Patterns wenn es keinen signifikanten Vorteil bringt.
+- **Generics**: Verzichte auf den Einsatz von Generics wenn es keinen signifikanten Vorteil bringt.

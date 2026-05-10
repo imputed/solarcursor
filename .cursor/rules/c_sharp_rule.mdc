@@ -1,0 +1,44 @@
+---
+description: Regeln für CSharp
+globs: */**/*.cs
+---
+
+# Höchste Priorität: Performance & Skalierbarkeit
+
+- **Resource Efficiency**: Minimiere Allocations. Nutze `ValueTask` für häufige asynchrone Operationen und `Span<T>` oder `Memory<T>` bei Datenverarbeitung, wo sinnvoll.
+- **Statelessness**: Designe Services konsequent zustandslos, um horizontale Skalierung (Scale-out) zu ermöglichen.
+- **Database Performance**: Nutze `AsNoTracking()` für Read-Only Abfragen in EF Core. Vermeide "N+1"-Probleme durch explizites Eager Loading (`Include`).
+- **Caching**: Schlage proaktiv Caching-Strategien (In-Memory oder Distributed wie Redis) für rechenintensive oder häufige Datenabfragen vor.
+- **Concurrency**: Nutze optimierte Locking-Mechanismen oder lock-freie Strukturen, um Bottlenecks in Multi-Threaded Szenarien zu vermeiden.
+
+# Entity Framework Core & Database Standards
+
+- **Explicit Schema Mapping**: Nutze Fluent API (`IEntityTypeConfiguration<T>`) statt Data Annotations in den Domain Models, um die Domain von EF-Abhängigkeiten reinzuhalten.
+- **Length Constraints**: Definiere für ALLE String-Properties explizite Längenbeschränkungen (z.B. `.HasMaxLength(255)`). Vermeide `NVARCHAR(MAX)`, wo es nicht absolut notwendig ist, um die Index-Performance zu maximieren.
+- **Index Optimization**: Schlage Indizes für Spalten vor, die häufig in `Where`-, `OrderBy`- oder `Join`-Klauseln verwendet werden.
+- **Decimal Precision**: Nutze explizite Precision für Finanzdaten oder Koordinaten (z.B. `.HasPrecision(18, 2)`).
+- **Split Queries**: Empfiehl `.AsSplitQuery()`, wenn große Collections per `Include` geladen werden, um den "Cartesian Product"-Effekt zu vermeiden.
+- **Migrations Safety**: Achte auf Standardwerte und Nullability. Generiere keine destruktiven Migrations ohne expliziten Hinweis.
+
+# Clean Architecture (Minimal API Style)
+
+- **Separation of Concerns**: Strenge Trennung von Domain, Application und Infrastructure.
+- **Presentation**: Halte `Program.cs` schlank. Nutze Extension Methods für das Mapping von Endpunkten, um die API modular und wartbar zu halten.
+- **Dependency Injection**: Nutze ausschließlich Constructor Injection. Vermeide Service-Locator-Patterns.
+- **Least Priviledges**: Nutze für alle Klassen die geringste Sichtbarkeit private>internal>public die noch die FUnktionalität ermöglicht
+# C# & .NET Standards
+
+- **Modern Syntax**: Nutze File-scoped Namespaces, Primary Constructors, `var` (nur bei Eindeutigkeit) und `required` Properties.
+- **No Unused Methods**: Implementiere keinen toten Code. Jede Methode muss eine aktive Referenz haben; ungenutzter Code wird konsequent entfernt.
+- **Async/Await**: Nutze konsequent `await` ohne Blockierung (`.Result` oder `.Wait()` ist strikt untersagt).
+
+# Professional Standards
+
+- **Strong Typing**: Nutze `Results<T1, T2>` für typisierte Rückgaben (OpenAPI/Swagger Support).
+- **Global Error Handling**: Zentrales Exception Handling (z.B. `IExceptionHandler`) statt redundanter Try-Catch-Blöcke in der Business Logik.
+- **Validation**: Nutze FluentValidation zur Entkopplung der Validierung von den DTOs.
+
+# Review-Anweisung
+
+- Prüfe bei jedem Code-Vorschlag: "Skaliert dieser Ansatz?" und "Gibt es einen performanteren Weg?".
+- Markiere ungenutzte Methoden, ineffiziente LINQ-Abfragen oder fehlende Datenbank-Constraints sofort als Refactoring-Bedarf.

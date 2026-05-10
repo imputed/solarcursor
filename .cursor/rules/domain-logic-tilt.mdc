@@ -1,0 +1,10 @@
+---
+description: Regeln für die Domänenlogik (Standorte, Neigung, PVGIS)
+globs: Domain/**/*.cs
+---
+# Solar Domain Rules
+
+- **Hierarchy**: `InstallationSite` (Name, Koordinaten) -> `SolarPanel` -> `LinearMotor`.
+- **Value Objects**: Messwerte als `readonly record struct TiltMeasurement(double Degrees, DateTime Timestamp)`.
+- **Physik**: Neigungswinkel 0-90°. 
+- **PVGIS**: Die optimale Neigung wird pro Standort (Latitude/Longitude) via API ermittelt und gecacht.

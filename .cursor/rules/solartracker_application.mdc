@@ -1,0 +1,11 @@
+---
+description: Regeln für die Domänenlogik (Standorte, Neigung, PVGIS)
+globs: Application/**/*.cs
+---
+
+# Services
+
+## General Structure
+- Services exist for InstallationSite, LinearMotor and SolarPanel 
+- They are intermediators and provideat least the functionality of the corresponding repository
+- If suitable they return the corrsesponding Dto. The dto is created from the DomainEntity.
