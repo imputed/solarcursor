@@ -35,8 +35,8 @@ internal static class TiltMeasuringUnitAnalyzeExpressionBuilder
                 Expression.Property(parameter, nameof(TiltMeasuringUnitDb.Id)),
                 leaf.Operator,
                 leaf.IntValue!.Value),
-            TiltMeasuringUnitAnalyzeField.InstallationSiteId => Primitives.IntComparison(
-                Expression.Property(parameter, nameof(TiltMeasuringUnitDb.InstallationSiteId)),
+            TiltMeasuringUnitAnalyzeField.SolarPanelId => Primitives.IntComparison(
+                Expression.Property(parameter, nameof(TiltMeasuringUnitDb.SolarPanelId)),
                 leaf.Operator,
                 leaf.IntValue!.Value),
             TiltMeasuringUnitAnalyzeField.Name => Primitives.StringComparison(

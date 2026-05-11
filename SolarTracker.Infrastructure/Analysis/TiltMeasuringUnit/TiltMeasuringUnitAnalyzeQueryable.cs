@@ -23,10 +23,10 @@ internal static class TiltMeasuringUnitAnalyzeQueryable
         sortBy switch
         {
             TiltMeasuringUnitAnalyzeField.Id => descending ? query.OrderByDescending(x => x.Id) : query.OrderBy(x => x.Id),
-            TiltMeasuringUnitAnalyzeField.InstallationSiteId =>
+            TiltMeasuringUnitAnalyzeField.SolarPanelId =>
                 descending
-                    ? query.OrderByDescending(x => x.InstallationSiteId).ThenBy(x => x.Id)
-                    : query.OrderBy(x => x.InstallationSiteId).ThenBy(x => x.Id),
+                    ? query.OrderByDescending(x => x.SolarPanelId).ThenBy(x => x.Id)
+                    : query.OrderBy(x => x.SolarPanelId).ThenBy(x => x.Id),
             TiltMeasuringUnitAnalyzeField.Name =>
                 descending
                     ? query.OrderByDescending(x => x.Name).ThenBy(x => x.Id)

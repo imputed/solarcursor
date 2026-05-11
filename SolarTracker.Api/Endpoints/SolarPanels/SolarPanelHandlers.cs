@@ -5,6 +5,7 @@ using SolarTracker.Application.Dtos;
 using SolarTracker.Application.Interfaces.QueryHandlers;
 using SolarTracker.Application.Interfaces.Services;
 using SolarTracker.Application.Mapping;
+using SolarTracker.Application.Results;
 using SolarTracker.Api.Infrastructure;
 using SolarTracker.Domain.Entities;
 
@@ -45,6 +46,33 @@ internal static class SolarPanelHandlers
     {
         SolarPanel? entity = await queryHandler.GetByIdAsync(id, cancellationToken);
         return entity is null ? TypedResults.NotFound() : TypedResults.Ok(SolarPanelMapping.ToDto(entity));
+    }
+
+    internal static async Task<Results<Ok<SolarPanelCurrentPositionDto>, NotFound>> GetCurrentPositionAsync(
+        int id,
+        ISolarPanelService service,
+        CancellationToken cancellationToken)
+    {
+        Result<SolarPanelCurrentPositionDto> result = await service.GetCurrentPositionAsync(id, cancellationToken);
+        return result.IsSuccess ? TypedResults.Ok(result.Value) : TypedResults.NotFound();
+    }
+
+    internal static async Task<Results<Ok<SolarPanelCurrentPositionDto>, NotFound, ProblemHttpResult>> MoveToOptimumAsync(
+        int id,
+        ISolarPanelService service,
+        CancellationToken cancellationToken)
+    {
+        Result<SolarPanelCurrentPositionDto> result = await service.MoveToOptimumAsync(id, cancellationToken);
+        if (result.IsSuccess)
+            return TypedResults.Ok(result.Value);
+
+        if (result.IsNotFound)
+            return TypedResults.NotFound();
+
+        return TypedResults.Problem(
+            title: "Solar panel movement failed",
+            detail: result.Error?.Message,
+            statusCode: StatusCodes.Status409Conflict);
     }
 
     internal static async Task<Results<Created<SolarPanelDto>, ValidationProblem>> CreateAsync(

@@ -17,9 +17,6 @@ internal static class InstallationSitePersistenceMapping
             Name = db.Name,
             Latitude = db.Latitude,
             Longitude = db.Longitude,
-            TiltMeasuringUnit = loadChildren && db.TiltMeasuringUnit is not null
-                ? TiltMeasuringUnitPersistenceMapping.ToDomain(db.TiltMeasuringUnit)
-                : null,
             SolarPanels = panels,
         };
     }

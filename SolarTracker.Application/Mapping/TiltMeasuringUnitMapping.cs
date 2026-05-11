@@ -6,11 +6,11 @@ namespace SolarTracker.Application.Mapping;
 public static class TiltMeasuringUnitMapping
 {
     public static TiltMeasuringUnitDto ToDto(TiltMeasuringUnit entity) =>
-        new(entity.Id, entity.InstallationSiteId, entity.Name, entity.GpioPin);
+        new(entity.Id, entity.SolarPanelId, entity.Name, entity.GpioPin);
 
     public static TiltMeasuringUnit ToDomain(CreateTiltMeasuringUnitDto dto) =>
-        new() { InstallationSiteId = dto.InstallationSiteId, Name = dto.Name, GpioPin = dto.GpioPin };
+        new() { SolarPanelId = dto.SolarPanelId, Name = dto.Name, GpioPin = dto.GpioPin };
 
     public static TiltMeasuringUnit ToDomain(UpdateTiltMeasuringUnitDto dto) =>
-        new() { Id = dto.Id, InstallationSiteId = dto.InstallationSiteId, Name = dto.Name, GpioPin = dto.GpioPin };
+        new() { Id = dto.Id, SolarPanelId = dto.SolarPanelId, Name = dto.Name, GpioPin = dto.GpioPin };
 }

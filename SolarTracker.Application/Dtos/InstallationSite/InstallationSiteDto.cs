@@ -5,5 +5,4 @@ public sealed record InstallationSiteDto(
     string Name,
     decimal Latitude,
     decimal Longitude,
-    TiltMeasuringUnitDto? TiltMeasuringUnit,
     IReadOnlyList<SolarPanelDto> SolarPanels);

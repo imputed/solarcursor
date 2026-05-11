@@ -13,10 +13,5 @@ internal sealed class InstallationSiteDbConfiguration : IEntityTypeConfiguration
         entity.Property(e => e.Name).HasMaxLength(256).IsRequired();
         entity.Property(e => e.Latitude).HasPrecision(9, 6);
         entity.Property(e => e.Longitude).HasPrecision(9, 6);
-
-        entity.HasOne(e => e.TiltMeasuringUnit)
-            .WithOne(e => e.InstallationSite)
-            .HasForeignKey<TiltMeasuringUnitDb>(e => e.InstallationSiteId)
-            .OnDelete(DeleteBehavior.Cascade);
     }
 }

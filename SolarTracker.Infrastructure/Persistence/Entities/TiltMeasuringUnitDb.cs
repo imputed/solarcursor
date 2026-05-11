@@ -4,9 +4,9 @@ public sealed class TiltMeasuringUnitDb
 {
     public int Id { get; set; }
 
-    public int InstallationSiteId { get; set; }
+    public int SolarPanelId { get; set; }
 
-    public InstallationSiteDb InstallationSite { get; set; } = null!;
+    public SolarPanelDb SolarPanel { get; set; } = null!;
 
     public string? Name { get; set; }
 

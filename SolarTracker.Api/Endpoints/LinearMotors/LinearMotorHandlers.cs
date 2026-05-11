@@ -5,6 +5,7 @@ using SolarTracker.Application.Dtos;
 using SolarTracker.Application.Interfaces.QueryHandlers;
 using SolarTracker.Application.Interfaces.Services;
 using SolarTracker.Application.Mapping;
+using SolarTracker.Application.Results;
 using SolarTracker.Api.Infrastructure;
 using SolarTracker.Domain.Entities;
 
@@ -122,12 +123,10 @@ internal static class LinearMotorHandlers
     {
         FluentValidation.Results.ValidationResult validation = await validator.ValidateAsync(request, cancellationToken);
         if (!validation.IsValid)
-        {
             return validation.ToValidationProblem();
-        }
 
-        bool moved = await service.MoveUpAsync(id, request, cancellationToken);
-        return moved ? TypedResults.NoContent() : TypedResults.NotFound();
+        Result result = await service.MoveUpAsync(id, request, cancellationToken);
+        return result.IsSuccess ? TypedResults.NoContent() : TypedResults.NotFound();
     }
 
     internal static async Task<Results<NoContent, NotFound, ValidationProblem>> MoveDownAsync(
@@ -139,12 +138,10 @@ internal static class LinearMotorHandlers
     {
         FluentValidation.Results.ValidationResult validation = await validator.ValidateAsync(request, cancellationToken);
         if (!validation.IsValid)
-        {
             return validation.ToValidationProblem();
-        }
 
-        bool moved = await service.MoveDownAsync(id, request, cancellationToken);
-        return moved ? TypedResults.NoContent() : TypedResults.NotFound();
+        Result result = await service.MoveDownAsync(id, request, cancellationToken);
+        return result.IsSuccess ? TypedResults.NoContent() : TypedResults.NotFound();
     }
 
     private static LinearMotorAnalyzeRequest CreateDefaultAnalyzeRequest() =>

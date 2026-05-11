@@ -10,7 +10,5 @@ public sealed class InstallationSite
 
     public decimal Longitude { get; set; }
 
-    public TiltMeasuringUnit? TiltMeasuringUnit { get; set; }
-
     public ICollection<SolarPanel> SolarPanels { get; set; } = [];
 }

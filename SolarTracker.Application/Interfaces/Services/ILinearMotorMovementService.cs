@@ -1,10 +1,11 @@
 using SolarTracker.Application.Dtos;
+using SolarTracker.Application.Results;
 
 namespace SolarTracker.Application.Interfaces.Services;
 
 public interface ILinearMotorMovementService
 {
-    ValueTask<bool> MoveUpAsync(int linearMotorId, LinearMotorMoveRequest request, CancellationToken cancellationToken);
+    ValueTask<Result> MoveUpAsync(int linearMotorId, LinearMotorMoveRequest request, CancellationToken cancellationToken);
 
-    ValueTask<bool> MoveDownAsync(int linearMotorId, LinearMotorMoveRequest request, CancellationToken cancellationToken);
+    ValueTask<Result> MoveDownAsync(int linearMotorId, LinearMotorMoveRequest request, CancellationToken cancellationToken);
 }

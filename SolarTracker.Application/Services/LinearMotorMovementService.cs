@@ -2,6 +2,7 @@ using SolarTracker.Application.Dtos;
 using SolarTracker.Application.Interfaces.Hardware;
 using SolarTracker.Application.Interfaces.QueryHandlers;
 using SolarTracker.Application.Interfaces.Services;
+using SolarTracker.Application.Results;
 
 namespace SolarTracker.Application.Interfaces.Services;
 
@@ -11,66 +12,65 @@ public sealed class LinearMotorMovementService(
     IInstallationSiteQueryHandler installationSiteQueryHandler,
     ILinearMotorActuator actuator) : ILinearMotorMovementService
 {
-    public async ValueTask<bool> MoveUpAsync(
+    public async ValueTask<Result> MoveUpAsync(
         int linearMotorId,
         LinearMotorMoveRequest request,
         CancellationToken cancellationToken)
     {
-        LinearMotorMovementContext? context = await BuildContextAsync(linearMotorId, request, cancellationToken);
-        if (context is null)
-        {
-            return false;
-        }
+        Result<LinearMotorMovementContext> contextResult =
+            await BuildContextAsync(linearMotorId, request, cancellationToken);
+        if (!contextResult.IsSuccess)
+            return Result.NotFound(contextResult.Error!.Code, contextResult.Error.Message);
 
-        await actuator.MoveUpAsync(context, cancellationToken);
-        return true;
+        await actuator.MoveUpAsync(contextResult.Value, cancellationToken);
+        return Result.Success();
     }
 
-    public async ValueTask<bool> MoveDownAsync(
+    public async ValueTask<Result> MoveDownAsync(
         int linearMotorId,
         LinearMotorMoveRequest request,
         CancellationToken cancellationToken)
     {
-        LinearMotorMovementContext? context = await BuildContextAsync(linearMotorId, request, cancellationToken);
-        if (context is null)
-        {
-            return false;
-        }
+        Result<LinearMotorMovementContext> contextResult =
+            await BuildContextAsync(linearMotorId, request, cancellationToken);
+        if (!contextResult.IsSuccess)
+            return Result.NotFound(contextResult.Error!.Code, contextResult.Error.Message);
 
-        await actuator.MoveDownAsync(context, cancellationToken);
-        return true;
+        await actuator.MoveDownAsync(contextResult.Value, cancellationToken);
+        return Result.Success();
     }
 
-    private async ValueTask<LinearMotorMovementContext?> BuildContextAsync(
+    private async ValueTask<Result<LinearMotorMovementContext>> BuildContextAsync(
         int linearMotorId,
         LinearMotorMoveRequest request,
         CancellationToken cancellationToken)
     {
         var linearMotor = await linearMotorQueryHandler.GetByIdAsync(linearMotorId, cancellationToken);
         if (linearMotor is null)
-        {
-            return null;
-        }
+            return Result<LinearMotorMovementContext>.NotFound(
+                "linear-motor-not-found",
+                $"Linear motor {linearMotorId} was not found.");
 
         var solarPanel = await solarPanelQueryHandler.GetByIdAsync(linearMotor.SolarPanelId, cancellationToken);
         if (solarPanel is null)
-        {
-            return null;
-        }
+            return Result<LinearMotorMovementContext>.NotFound(
+                "solar-panel-not-found",
+                $"Solar panel {linearMotor.SolarPanelId} was not found.");
 
         var installationSite = await installationSiteQueryHandler.GetByIdAsync(solarPanel.InstallationSiteId, cancellationToken);
         if (installationSite is null)
-        {
-            return null;
-        }
+            return Result<LinearMotorMovementContext>.NotFound(
+                "installation-site-not-found",
+                $"Installation site {solarPanel.InstallationSiteId} was not found.");
 
-        return new LinearMotorMovementContext(
-            linearMotor.Id,
-            installationSite.Id,
-            installationSite.Latitude,
-            installationSite.Longitude,
-            linearMotor.MoveUpGpioPin,
-            linearMotor.MoveDownGpioPin,
-            request.DurationMs);
+        return Result<LinearMotorMovementContext>.Success(
+            new LinearMotorMovementContext(
+                linearMotor.Id,
+                installationSite.Id,
+                installationSite.Latitude,
+                installationSite.Longitude,
+                linearMotor.MoveUpGpioPin,
+                linearMotor.MoveDownGpioPin,
+                request.DurationMs));
     }
 }

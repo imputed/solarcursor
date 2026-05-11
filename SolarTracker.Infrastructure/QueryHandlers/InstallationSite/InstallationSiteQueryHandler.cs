@@ -15,7 +15,8 @@ public sealed class InstallationSiteQueryHandler(SolarTrackerDbContext dbContext
     {
         var row = await dbContext.InstallationSites
             .AsNoTracking()
-            .Include(site => site.TiltMeasuringUnit)
+            .Include(site => site.SolarPanels)
+                .ThenInclude(panel => panel.TiltMeasuringUnit)
             .Include(site => site.SolarPanels)
                 .ThenInclude(panel => panel.CurrentMeasuringUnit)
             .Include(site => site.SolarPanels)

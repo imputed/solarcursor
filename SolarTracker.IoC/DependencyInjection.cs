@@ -2,9 +2,12 @@ using System.Runtime.InteropServices;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using SolarTracker.Application.Interfaces.Calculators;
 using SolarTracker.Application.Interfaces.Hardware;
 using SolarTracker.Application.Interfaces.QueryHandlers;
 using SolarTracker.Application.Interfaces.Repositories;
+using SolarTracker.Domain.Abstractions;
+using SolarTracker.Infrastructure.Calculators;
 using SolarTracker.Infrastructure.Hardware;
 using SolarTracker.Infrastructure.Persistence;
 using SolarTracker.Infrastructure.QueryHandlers.CurrentMeasuringUnit;
@@ -33,11 +36,14 @@ public static class DependencyInjection
         services.AddScoped<ILinearMotorRepository, LinearMotorRepository>();
         services.AddScoped<ITiltMeasuringUnitRepository, TiltMeasuringUnitRepository>();
         services.AddScoped<ICurrentMeasuringUnitRepository, CurrentMeasuringUnitRepository>();
+        services.AddScoped<ISolarTrackingConfigurationRepository, SolarTrackingConfigurationRepository>();
         services.AddScoped<IInstallationSiteQueryHandler, InstallationSiteQueryHandler>();
         services.AddScoped<ISolarPanelQueryHandler, SolarPanelQueryHandler>();
         services.AddScoped<ILinearMotorQueryHandler, LinearMotorQueryHandler>();
         services.AddScoped<ITiltMeasuringUnitQueryHandler, TiltMeasuringUnitQueryHandler>();
         services.AddScoped<ICurrentMeasuringUnitQueryHandler, CurrentMeasuringUnitQueryHandler>();
+        services.AddScoped<ISolarmoduleCalculator, SolarmoduleCalculator>();
+        services.AddSingleton(TimeProvider.System);
 
         bool? configuredUseFakeGpio = bool.TryParse(configuration["RaspberryPi:UseFakeGpio"], out bool parsedUseFakeGpio)
             ? parsedUseFakeGpio
@@ -50,10 +56,12 @@ public static class DependencyInjection
         if (useFakeGpio)
         {
             services.AddSingleton<ILinearMotorActuator, FakeLinearMotorActuator>();
+            services.AddSingleton<ITiltMeasuringUnitPositionReader, FakeTiltMeasuringUnitPositionReader>();
         }
         else
         {
             services.AddSingleton<ILinearMotorActuator, RaspberryPiLinearMotorActuator>();
+            services.AddSingleton<ITiltMeasuringUnitPositionReader, RaspberryPiTiltMeasuringUnitPositionReader>();
         }
 
         return services;

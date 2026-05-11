@@ -25,3 +25,4 @@ alwaysApply: false
 
 - DTOs are transport-facing contracts and must remain free of business logic.
 - Validation rules belong in FluentValidation validators, not in DTOs.
+- For expected application outcomes, use explicit `Result` returns, no `null` sentinels.

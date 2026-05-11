@@ -11,6 +11,12 @@ internal static class SolarPanelPersistenceMapping
             Id = db.Id,
             InstallationSiteId = db.InstallationSiteId,
             SerialNumber = db.SerialNumber,
+            SolarTrackingConfiguration = loadChildren && db.SolarTrackingConfiguration is not null
+                ? SolarTrackingConfigurationPersistenceMapping.ToDomain(db.SolarTrackingConfiguration)
+                : null,
+            TiltMeasuringUnit = loadChildren && db.TiltMeasuringUnit is not null
+                ? TiltMeasuringUnitPersistenceMapping.ToDomain(db.TiltMeasuringUnit)
+                : null,
             CurrentMeasuringUnit = loadChildren && db.CurrentMeasuringUnit is not null
                 ? CurrentMeasuringUnitPersistenceMapping.ToDomain(db.CurrentMeasuringUnit)
                 : null,

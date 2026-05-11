@@ -10,6 +10,7 @@ public static class SolarPanelMapping
             entity.Id,
             entity.InstallationSiteId,
             entity.SerialNumber,
+            entity.TiltMeasuringUnit is null ? null : TiltMeasuringUnitMapping.ToDto(entity.TiltMeasuringUnit),
             entity.CurrentMeasuringUnit is null ? null : CurrentMeasuringUnitMapping.ToDto(entity.CurrentMeasuringUnit),
             entity.LinearMotors.Select(LinearMotorMapping.ToDto).ToList());
 
@@ -18,6 +19,8 @@ public static class SolarPanelMapping
         {
             InstallationSiteId = dto.InstallationSiteId,
             SerialNumber = dto.SerialNumber,
+            SolarTrackingConfiguration = null,
+            TiltMeasuringUnit = null,
             CurrentMeasuringUnit = null,
             LinearMotors = [],
         };
@@ -28,6 +31,8 @@ public static class SolarPanelMapping
             Id = dto.Id,
             InstallationSiteId = dto.InstallationSiteId,
             SerialNumber = dto.SerialNumber,
+            SolarTrackingConfiguration = null,
+            TiltMeasuringUnit = null,
             CurrentMeasuringUnit = null,
             LinearMotors = [],
         };

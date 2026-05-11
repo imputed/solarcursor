@@ -6,8 +6,8 @@ alwaysApply: true
 # Solar Domain Model
 
 - `InstallationSite` is the root location entity and stores name and coordinates.
-- Each `InstallationSite` has exactly one `TiltMeasuringUnit`.
 - Each `InstallationSite` has one or more `SolarPanel` entities.
+- Each `SolarPanel` has exactly one `TiltMeasuringUnit`.
 - Each `SolarPanel` has exactly one `CurrentMeasuringUnit`.
 - Each `SolarPanel` has one or more `LinearMotor` entities.
 

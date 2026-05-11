@@ -110,6 +110,32 @@ namespace SolarTracker.Infrastructure.Migrations
                     b.ToTable("SolarPanels", (string)null);
                 });
 
+            modelBuilder.Entity("SolarTracker.Infrastructure.Persistence.Entities.SolarTrackingConfigurationDb", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("MaxAdjustmentSteps")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<double>("PositionThresholdDegrees")
+                        .HasColumnType("REAL");
+
+                    b.Property<int>("SolarPanelId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("StepDurationMs")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SolarPanelId")
+                        .IsUnique();
+
+                    b.ToTable("SolarTrackingConfigurations", (string)null);
+                });
+
             modelBuilder.Entity("SolarTracker.Infrastructure.Persistence.Entities.TiltMeasuringUnitDb", b =>
                 {
                     b.Property<int>("Id")
@@ -119,7 +145,7 @@ namespace SolarTracker.Infrastructure.Migrations
                     b.Property<int>("GpioPin")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("InstallationSiteId")
+                    b.Property<int>("SolarPanelId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
@@ -128,7 +154,7 @@ namespace SolarTracker.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("InstallationSiteId")
+                    b.HasIndex("SolarPanelId")
                         .IsUnique();
 
                     b.ToTable("TiltMeasuringUnits", (string)null);
@@ -167,26 +193,39 @@ namespace SolarTracker.Infrastructure.Migrations
                     b.Navigation("InstallationSite");
                 });
 
-            modelBuilder.Entity("SolarTracker.Infrastructure.Persistence.Entities.TiltMeasuringUnitDb", b =>
+            modelBuilder.Entity("SolarTracker.Infrastructure.Persistence.Entities.SolarTrackingConfigurationDb", b =>
                 {
-                    b.HasOne("SolarTracker.Infrastructure.Persistence.Entities.InstallationSiteDb", "InstallationSite")
-                        .WithOne("TiltMeasuringUnit")
-                        .HasForeignKey("SolarTracker.Infrastructure.Persistence.Entities.TiltMeasuringUnitDb", "InstallationSiteId")
+                    b.HasOne("SolarTracker.Infrastructure.Persistence.Entities.SolarPanelDb", "SolarPanel")
+                        .WithOne("SolarTrackingConfiguration")
+                        .HasForeignKey("SolarTracker.Infrastructure.Persistence.Entities.SolarTrackingConfigurationDb", "SolarPanelId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("InstallationSite");
+                    b.Navigation("SolarPanel");
+                });
+
+            modelBuilder.Entity("SolarTracker.Infrastructure.Persistence.Entities.TiltMeasuringUnitDb", b =>
+                {
+                    b.HasOne("SolarTracker.Infrastructure.Persistence.Entities.SolarPanelDb", "SolarPanel")
+                        .WithOne("TiltMeasuringUnit")
+                        .HasForeignKey("SolarTracker.Infrastructure.Persistence.Entities.TiltMeasuringUnitDb", "SolarPanelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SolarPanel");
                 });
 
             modelBuilder.Entity("SolarTracker.Infrastructure.Persistence.Entities.InstallationSiteDb", b =>
                 {
                     b.Navigation("SolarPanels");
-
-                    b.Navigation("TiltMeasuringUnit");
                 });
 
             modelBuilder.Entity("SolarTracker.Infrastructure.Persistence.Entities.SolarPanelDb", b =>
                 {
+                    b.Navigation("SolarTrackingConfiguration");
+
+                    b.Navigation("TiltMeasuringUnit");
+
                     b.Navigation("CurrentMeasuringUnit");
 
                     b.Navigation("LinearMotors");

@@ -104,7 +104,7 @@ public sealed class TiltMeasuringUnitAnalyzeRequestValidator : AbstractValidator
         switch (leaf.Field)
         {
             case TiltMeasuringUnitAnalyzeField.Id:
-            case TiltMeasuringUnitAnalyzeField.InstallationSiteId:
+            case TiltMeasuringUnitAnalyzeField.SolarPanelId:
             case TiltMeasuringUnitAnalyzeField.GpioPin:
                 ValidateIntLeaf(leaf, context, path);
                 break;

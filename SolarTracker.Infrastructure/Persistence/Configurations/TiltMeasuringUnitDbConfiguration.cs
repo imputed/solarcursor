@@ -10,7 +10,7 @@ internal sealed class TiltMeasuringUnitDbConfiguration : IEntityTypeConfiguratio
     {
         entity.ToTable("TiltMeasuringUnits");
         entity.HasKey(e => e.Id);
-        entity.HasIndex(e => e.InstallationSiteId).IsUnique();
+        entity.HasIndex(e => e.SolarPanelId).IsUnique();
         entity.Property(e => e.Name).HasMaxLength(128);
         entity.Property(e => e.GpioPin).IsRequired();
     }

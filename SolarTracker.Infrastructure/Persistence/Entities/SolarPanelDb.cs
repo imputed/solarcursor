@@ -10,6 +10,10 @@ public sealed class SolarPanelDb
 
     public string? SerialNumber { get; set; }
 
+    public SolarTrackingConfigurationDb? SolarTrackingConfiguration { get; set; }
+
+    public TiltMeasuringUnitDb? TiltMeasuringUnit { get; set; }
+
     public CurrentMeasuringUnitDb? CurrentMeasuringUnit { get; set; }
 
     public ICollection<LinearMotorDb> LinearMotors { get; set; } = [];

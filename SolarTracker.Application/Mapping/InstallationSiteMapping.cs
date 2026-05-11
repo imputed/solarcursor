@@ -11,7 +11,6 @@ public static class InstallationSiteMapping
             entity.Name,
             entity.Latitude,
             entity.Longitude,
-            entity.TiltMeasuringUnit is null ? null : TiltMeasuringUnitMapping.ToDto(entity.TiltMeasuringUnit),
             entity.SolarPanels.Select(SolarPanelMapping.ToDto).ToList());
 
     public static InstallationSite ToDomain(CreateInstallationSiteDto dto) =>
@@ -20,7 +19,6 @@ public static class InstallationSiteMapping
             Name = dto.Name,
             Latitude = dto.Latitude,
             Longitude = dto.Longitude,
-            TiltMeasuringUnit = null,
             SolarPanels = [],
         };
 
@@ -31,7 +29,6 @@ public static class InstallationSiteMapping
             Name = dto.Name,
             Latitude = dto.Latitude,
             Longitude = dto.Longitude,
-            TiltMeasuringUnit = null,
             SolarPanels = [],
         };
 }

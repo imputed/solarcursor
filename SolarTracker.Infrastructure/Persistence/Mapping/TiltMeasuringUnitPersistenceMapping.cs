@@ -9,7 +9,7 @@ internal static class TiltMeasuringUnitPersistenceMapping
         new()
         {
             Id = db.Id,
-            InstallationSiteId = db.InstallationSiteId,
+            SolarPanelId = db.SolarPanelId,
             Name = db.Name,
             GpioPin = db.GpioPin,
         };
@@ -18,14 +18,14 @@ internal static class TiltMeasuringUnitPersistenceMapping
         new()
         {
             Id = domain.Id,
-            InstallationSiteId = domain.InstallationSiteId,
+            SolarPanelId = domain.SolarPanelId,
             Name = domain.Name,
             GpioPin = domain.GpioPin,
         };
 
     public static void CopyScalars(TiltMeasuringUnitDb target, TiltMeasuringUnit source)
     {
-        target.InstallationSiteId = source.InstallationSiteId;
+        target.SolarPanelId = source.SolarPanelId;
         target.Name = source.Name;
         target.GpioPin = source.GpioPin;
     }
