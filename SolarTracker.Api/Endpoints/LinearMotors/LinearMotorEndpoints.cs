@@ -9,8 +9,8 @@ internal static class LinearMotorEndpoints
         RouteGroupBuilder group = app.MapGroup("/api/linear-motors")
             .WithTags("LinearMotors");
 
-        group.MapGet("/", LinearMotorHandlers.ListAsync)
-            .WithName("ListLinearMotors")
+        group.MapGet("/", LinearMotorHandlers.GetCollectionAsync)
+            .WithName("GetLinearMotors")
             .Produces<IReadOnlyList<LinearMotorDto>>(StatusCodes.Status200OK);
 
         group.MapPost("/analyze", LinearMotorHandlers.AnalyzeAsync)
@@ -30,6 +30,18 @@ internal static class LinearMotorEndpoints
 
         group.MapPut("/{id:int}", LinearMotorHandlers.PutAsync)
             .WithName("UpdateLinearMotor")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound)
+            .ProducesValidationProblem(StatusCodes.Status400BadRequest);
+
+        group.MapPost("/{id:int}/move-up", LinearMotorHandlers.MoveUpAsync)
+            .WithName("MoveLinearMotorUp")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound)
+            .ProducesValidationProblem(StatusCodes.Status400BadRequest);
+
+        group.MapPost("/{id:int}/move-down", LinearMotorHandlers.MoveDownAsync)
+            .WithName("MoveLinearMotorDown")
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound)
             .ProducesValidationProblem(StatusCodes.Status400BadRequest);

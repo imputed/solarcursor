@@ -1,0 +1,23 @@
+---
+description: Analyze endpoint and filtering rules
+globs: SolarTracker.Application/Analysis/**/*.cs, SolarTracker.Infrastructure/Analysis/**/*.cs, SolarTracker.Api/Validation/Analyze/**/*.cs
+alwaysApply: false
+---
+
+# Analysis and Filtering
+
+- Each entity must define its own analyze request, field enum, node types, and predicates.
+- Filtering must use an explicit whitelist of allowed scalar fields.
+- Navigation filtering is not allowed unless a dedicated rule explicitly introduces it.
+- Analyze requests must support filter, sorting, skip, and take.
+
+# Translation Rules
+
+- Analyze trees must be translated into EF-translatable expressions.
+- Filtering and sorting must execute in the database, not in memory.
+- `GET /...` collection endpoints must internally use `AnalyzeAsync(...)` with a default request.
+
+# Validation
+
+- Validate operators, fields, skip, and take values before query execution.
+- Reject unsupported fields and operators early.

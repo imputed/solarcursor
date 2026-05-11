@@ -1,0 +1,23 @@
+---
+description: API endpoint, OpenAPI, and Scalar rules
+globs: SolarTracker.Api/**/*.cs
+alwaysApply: false
+---
+
+# Presentation Layer
+
+- The API layer exposes transport concerns only.
+- Minimal API handlers must remain thin and must not contain business logic.
+
+# Endpoint Rules
+
+- Use `TypedResults` or `Results<T1, ...>` for strongly typed responses.
+- `GET /`, `GET /{id}`, and `POST /analyze` must use the corresponding query handler.
+- `POST`, `PUT`, and `DELETE` must use the corresponding service.
+- Read-after-write and existence checks must use query handlers, not repositories.
+
+# OpenAPI and Scalar
+
+- Use `Microsoft.AspNetCore.OpenApi` and `Scalar.AspNetCore`.
+- In Development, call `MapOpenApi()` and then `MapScalarApiReference()`.
+- Keep OpenAPI metadata compatible with typed Minimal API responses and source-generated serialization.

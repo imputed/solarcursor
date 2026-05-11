@@ -11,6 +11,10 @@ public sealed class SolarTrackerDbContext(DbContextOptions<SolarTrackerDbContext
 
     public DbSet<LinearMotorDb> LinearMotors => Set<LinearMotorDb>();
 
+    public DbSet<TiltMeasuringUnitDb> TiltMeasuringUnits => Set<TiltMeasuringUnitDb>();
+
+    public DbSet<CurrentMeasuringUnitDb> CurrentMeasuringUnits => Set<CurrentMeasuringUnitDb>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder) =>
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(SolarTrackerDbContext).Assembly);
 }

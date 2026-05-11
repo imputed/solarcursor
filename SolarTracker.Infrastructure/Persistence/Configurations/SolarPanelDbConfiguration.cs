@@ -17,5 +17,10 @@ internal sealed class SolarPanelDbConfiguration : IEntityTypeConfiguration<Solar
             .WithMany(e => e.SolarPanels)
             .HasForeignKey(e => e.InstallationSiteId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        entity.HasOne(e => e.CurrentMeasuringUnit)
+            .WithOne(e => e.SolarPanel)
+            .HasForeignKey<CurrentMeasuringUnitDb>(e => e.SolarPanelId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

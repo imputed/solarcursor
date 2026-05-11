@@ -1,0 +1,29 @@
+---
+description: Solar domain model and business constraints
+alwaysApply: true
+---
+
+# Solar Domain Model
+
+- `InstallationSite` is the root location entity and stores name and coordinates.
+- Each `InstallationSite` has exactly one `TiltMeasuringUnit`.
+- Each `InstallationSite` has one or more `SolarPanel` entities.
+- Each `SolarPanel` has exactly one `CurrentMeasuringUnit`.
+- Each `SolarPanel` has one or more `LinearMotor` entities.
+
+# Hardware Model
+
+- A `TiltMeasuringUnit` uses one GPIO pin for reading.
+- A `CurrentMeasuringUnit` uses one GPIO pin for reading.
+- A `LinearMotor` uses two GPIO pins for movement control: move up and move down.
+
+# Domain Constraints
+
+- Tilt values are represented as `readonly record struct TiltMeasurement(double Degrees, DateTime Timestamp)`.
+- Valid tilt ranges are `0` to `90` degrees.
+- Automatic motor movement is allowed only when the absolute delta between measured and target tilt is greater than `1` degree.
+
+# PVGIS
+
+- The target tilt is determined per installation site using latitude and longitude.
+- PVGIS results must be cached to avoid unnecessary repeated remote calls.

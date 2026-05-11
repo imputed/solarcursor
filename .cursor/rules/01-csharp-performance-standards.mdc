@@ -1,0 +1,28 @@
+---
+description: C# implementation, AOT, and performance standards
+globs: **/*.cs
+alwaysApply: false
+---
+
+# C# and Performance Standards
+
+- Code must be Native AOT-ready.
+- Prefer compile-time and source-generated mechanisms over reflection-based runtime behavior.
+- Use file-scoped namespaces.
+- Namespaces must match the physical folder structure of the file.
+- Use one top-level class, interface, enum, record, or struct per file.
+- If multiple files belong to the same entity, group them in a folder named after that entity.
+
+# Construction and Contracts
+
+- Primary constructors are the default for injectable types and must be used unless a documented technical reason prevents them.
+- Explicit constructors are allowed only for framework behavior, serializer compatibility, inheritance constraints, compiler limitations, or materially better readability.
+- Do not use default values for `CancellationToken`; require the token explicitly.
+- Use `ValueTask` for hot-path I/O contracts when it provides a measurable benefit.
+
+# API and Quality
+
+- Use `TypedResults` or `Results<T1, ...>` for Minimal API handlers.
+- All request and response DTOs must be registered in the JSON source generation context.
+- Do not leave dead code, unused methods, or placeholder implementations in the codebase.
+- Prefer the least possible visibility that still supports the required behavior.

@@ -1,9 +1,0 @@
----
-description: Standards für CRUD-Endpunkte
-globs: WebApi/Endpoints/**/*.cs
----
-# CRUD API Standards
-
-- **Routes**: Use plurals as endpoints. E.g. `/api/v1/sites`, `/api/v1/sites/{siteId}/panels`, `/api/v1/panels/{panelId}/motors`.
-- **Performance**: Nutze `TypedResults` für 0-Reflection Metadaten.
-- **AOT**: Registriere alle Response-Records im `JsonSerializerContext`.

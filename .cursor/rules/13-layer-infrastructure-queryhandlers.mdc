@@ -1,0 +1,28 @@
+---
+description: Infrastructure query handler rules
+globs: SolarTracker.Infrastructure/QueryHandlers/**/*.cs, SolarTracker.Infrastructure/Analysis/**/*.cs
+alwaysApply: false
+---
+
+# Infrastructure Query Handlers
+
+- Each entity has a dedicated query handler implementation.
+- Allowed query handler methods are `GetByIdAsync` and `AnalyzeAsync`.
+
+# Read Performance
+
+- Use `AsNoTracking()` for all read-only queries.
+- Prevent N+1 problems through explicit eager loading where required.
+- Use `AsSplitQuery()` for large graph loads with multiple collections.
+- Collection reads must run through `AnalyzeAsync`; do not introduce a separate `ListAsync` path.
+
+# Responsibilities
+
+- Query handlers translate read requests into efficient EF Core queries.
+- Query handlers map database entities to domain entities.
+- Query handlers must not perform writes or business orchestration.
+
+# Analysis
+
+- Analyze pipelines must stay EF-translatable.
+- Filtering, sorting, skip, and take must be applied in the database query whenever possible.

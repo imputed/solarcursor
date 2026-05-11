@@ -1,0 +1,23 @@
+---
+description: Mapping conventions across layers
+globs: SolarTracker.Application/Mapping/**/*.cs, SolarTracker.Infrastructure/Persistence/Mapping/**/*.cs
+alwaysApply: false
+---
+
+# Mapping Conventions
+
+- Mapping must be explicit and file-per-entity.
+- Application mappings handle `DTO <-> Domain`.
+- Infrastructure persistence mappings handle `Domain <-> DatabaseEntity`.
+
+# Rules
+
+- Mapping classes must not contain I/O.
+- Mapping classes must not depend on DI.
+- Mapping classes must not contain business rules.
+- Scalar copy operations must be explicit and readable.
+
+# Naming
+
+- Use consistent names such as `InstallationSiteMapping` and `InstallationSitePersistenceMapping`.
+- Keep mapping methods symmetrical where appropriate, such as `ToDomain`, `ToDto`, `ToDb`, and `CopyScalars`.

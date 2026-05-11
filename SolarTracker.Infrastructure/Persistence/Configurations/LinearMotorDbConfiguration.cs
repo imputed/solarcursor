@@ -10,12 +10,14 @@ internal sealed class LinearMotorDbConfiguration : IEntityTypeConfiguration<Line
     {
         entity.ToTable("LinearMotors");
         entity.HasKey(e => e.Id);
-        entity.HasIndex(e => e.InstallationSiteId);
+        entity.HasIndex(e => e.SolarPanelId);
         entity.Property(e => e.Name).HasMaxLength(128);
+        entity.Property(e => e.MoveUpGpioPin).IsRequired();
+        entity.Property(e => e.MoveDownGpioPin).IsRequired();
 
-        entity.HasOne(e => e.InstallationSite)
+        entity.HasOne(e => e.SolarPanel)
             .WithMany(e => e.LinearMotors)
-            .HasForeignKey(e => e.InstallationSiteId)
+            .HasForeignKey(e => e.SolarPanelId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

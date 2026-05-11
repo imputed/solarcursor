@@ -1,0 +1,26 @@
+---
+description: Core architecture and dependency rules
+alwaysApply: true
+---
+
+# SolarTracker Core Architecture
+
+- The solution must follow a strict layered architecture.
+- `SolarTracker.Domain` must not depend on any other project.
+- `SolarTracker.Application` may depend only on `SolarTracker.Domain`.
+- `SolarTracker.Infrastructure` may depend only on `SolarTracker.Application` and `SolarTracker.Domain`.
+- `SolarTracker.Api` must expose transport concerns only and must not contain business logic or persistence logic.
+- `SolarTracker.IoC` is the composition root and owns the registration of concrete implementations.
+
+# Dependency Rules
+
+- Do not bypass layer boundaries.
+- Do not access Entity Framework types outside `SolarTracker.Infrastructure`.
+- Do not place HTTP, GPIO, OpenAPI, or serialization concerns in `Domain` or `Application`.
+- Do not introduce mediator, event bus, or message-driven indirection unless a dedicated rule explicitly requires it.
+
+# Composition Rules
+
+- Constructor injection is mandatory.
+- Property injection, method injection, and service locator patterns are not allowed.
+- Keep `Program.cs` minimal and delegate endpoint registration to extension methods.

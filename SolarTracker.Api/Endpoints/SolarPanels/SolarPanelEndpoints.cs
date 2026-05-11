@@ -9,8 +9,8 @@ internal static class SolarPanelEndpoints
         RouteGroupBuilder group = app.MapGroup("/api/solar-panels")
             .WithTags("SolarPanels");
 
-        group.MapGet("/", SolarPanelHandlers.ListAsync)
-            .WithName("ListSolarPanels")
+        group.MapGet("/", SolarPanelHandlers.GetCollectionAsync)
+            .WithName("GetSolarPanels")
             .Produces<IReadOnlyList<SolarPanelDto>>(StatusCodes.Status200OK);
 
         group.MapPost("/analyze", SolarPanelHandlers.AnalyzeAsync)

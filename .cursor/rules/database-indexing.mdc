@@ -1,9 +1,0 @@
----
-description: Regeln für die Indizierung von SQL-Tabellen
-globs: Infrastructure/Persistence/**/*.cs, **/Migrations/*.cs
----
-# SQL Indexing Standards
-
-- **FK-Indices**: Jeder Fremdschlüssel (z.B. `InstallationSiteId`) muss einen Non-Clustered Index erhalten.
-- **Composite Index**: Zeitreihen-Daten (Tilt) benötigen einen Index über `(PanelId, Timestamp DESC)`.
-- **Unique**: Seriennummern erhalten einen Unique Index.

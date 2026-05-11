@@ -8,5 +8,7 @@ public sealed class CreateInstallationSiteDtoValidator : AbstractValidator<Creat
     public CreateInstallationSiteDtoValidator()
     {
         RuleFor(d => d.Name).NotEmpty().MaximumLength(256);
+        RuleFor(d => d.Latitude).InclusiveBetween(-90m, 90m);
+        RuleFor(d => d.Longitude).InclusiveBetween(-180m, 180m);
     }
 }

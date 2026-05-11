@@ -2,25 +2,29 @@ using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
 using SolarTracker.Application.Analysis;
 using SolarTracker.Application.Dtos;
+using SolarTracker.Application.Interfaces.QueryHandlers;
 using SolarTracker.Application.Interfaces.Services;
+using SolarTracker.Application.Mapping;
 using SolarTracker.Api.Infrastructure;
+using SolarTracker.Domain.Entities;
 
 namespace SolarTracker.Api.Endpoints.LinearMotors;
 
 internal static class LinearMotorHandlers
 {
-    internal static async Task<Ok<IReadOnlyList<LinearMotorDto>>> ListAsync(
-        ILinearMotorService service,
+    internal static async Task<Ok<IReadOnlyList<LinearMotorDto>>> GetCollectionAsync(
+        ILinearMotorQueryHandler queryHandler,
         CancellationToken cancellationToken)
     {
-        IReadOnlyList<LinearMotorDto> list = await service.ListAsync(cancellationToken);
-        return TypedResults.Ok(list);
+        IReadOnlyList<LinearMotor> entities = await queryHandler.AnalyzeAsync(CreateDefaultAnalyzeRequest(), cancellationToken);
+        IReadOnlyList<LinearMotorDto> dtos = entities.Select(LinearMotorMapping.ToDto).ToList();
+        return TypedResults.Ok(dtos);
     }
 
     internal static async Task<Results<Ok<IReadOnlyList<LinearMotorDto>>, ValidationProblem>> AnalyzeAsync(
         LinearMotorAnalyzeRequest body,
         IValidator<LinearMotorAnalyzeRequest> validator,
-        ILinearMotorService service,
+        ILinearMotorQueryHandler queryHandler,
         CancellationToken cancellationToken)
     {
         FluentValidation.Results.ValidationResult validation = await validator.ValidateAsync(body, cancellationToken);
@@ -29,23 +33,25 @@ internal static class LinearMotorHandlers
             return validation.ToValidationProblem();
         }
 
-        IReadOnlyList<LinearMotorDto> result = await service.AnalyzeAsync(body, cancellationToken);
-        return TypedResults.Ok(result);
+        IReadOnlyList<LinearMotor> entities = await queryHandler.AnalyzeAsync(body, cancellationToken);
+        IReadOnlyList<LinearMotorDto> dtos = entities.Select(LinearMotorMapping.ToDto).ToList();
+        return TypedResults.Ok(dtos);
     }
 
     internal static async Task<Results<Ok<LinearMotorDto>, NotFound>> GetByIdAsync(
         int id,
-        ILinearMotorService service,
+        ILinearMotorQueryHandler queryHandler,
         CancellationToken cancellationToken)
     {
-        LinearMotorDto? dto = await service.GetByIdAsync(id, cancellationToken);
-        return dto is null ? TypedResults.NotFound() : TypedResults.Ok(dto);
+        LinearMotor? entity = await queryHandler.GetByIdAsync(id, cancellationToken);
+        return entity is null ? TypedResults.NotFound() : TypedResults.Ok(LinearMotorMapping.ToDto(entity));
     }
 
     internal static async Task<Results<Created<LinearMotorDto>, ValidationProblem>> CreateAsync(
         CreateLinearMotorDto dto,
         IValidator<CreateLinearMotorDto> validator,
         ILinearMotorService service,
+        ILinearMotorQueryHandler queryHandler,
         CancellationToken cancellationToken)
     {
         FluentValidation.Results.ValidationResult validation = await validator.ValidateAsync(dto, cancellationToken);
@@ -55,13 +61,13 @@ internal static class LinearMotorHandlers
         }
 
         int newId = await service.AddAsync(dto, cancellationToken);
-        LinearMotorDto? created = await service.GetByIdAsync(newId, cancellationToken);
+        LinearMotor? created = await queryHandler.GetByIdAsync(newId, cancellationToken);
         if (created is null)
         {
             return TypedResults.ValidationProblem(new Dictionary<string, string[]> { ["_"] = ["Entity was not persisted."] });
         }
 
-        return TypedResults.Created($"/api/linear-motors/{newId}", created);
+        return TypedResults.Created($"/api/linear-motors/{newId}", LinearMotorMapping.ToDto(created));
     }
 
     internal static async Task<Results<NoContent, NotFound, ValidationProblem>> PutAsync(
@@ -69,6 +75,7 @@ internal static class LinearMotorHandlers
         UpdateLinearMotorDto dto,
         IValidator<UpdateLinearMotorDto> validator,
         ILinearMotorService service,
+        ILinearMotorQueryHandler queryHandler,
         CancellationToken cancellationToken)
     {
         if (id != dto.Id)
@@ -82,7 +89,7 @@ internal static class LinearMotorHandlers
             return validation.ToValidationProblem();
         }
 
-        if (await service.GetByIdAsync(id, cancellationToken) is null)
+        if (await queryHandler.GetByIdAsync(id, cancellationToken) is null)
         {
             return TypedResults.NotFound();
         }
@@ -94,9 +101,10 @@ internal static class LinearMotorHandlers
     internal static async Task<Results<NoContent, NotFound>> DeleteAsync(
         int id,
         ILinearMotorService service,
+        ILinearMotorQueryHandler queryHandler,
         CancellationToken cancellationToken)
     {
-        if (await service.GetByIdAsync(id, cancellationToken) is null)
+        if (await queryHandler.GetByIdAsync(id, cancellationToken) is null)
         {
             return TypedResults.NotFound();
         }
@@ -104,4 +112,41 @@ internal static class LinearMotorHandlers
         await service.DeleteAsync(id, cancellationToken);
         return TypedResults.NoContent();
     }
+
+    internal static async Task<Results<NoContent, NotFound, ValidationProblem>> MoveUpAsync(
+        int id,
+        LinearMotorMoveRequest request,
+        IValidator<LinearMotorMoveRequest> validator,
+        ILinearMotorMovementService service,
+        CancellationToken cancellationToken)
+    {
+        FluentValidation.Results.ValidationResult validation = await validator.ValidateAsync(request, cancellationToken);
+        if (!validation.IsValid)
+        {
+            return validation.ToValidationProblem();
+        }
+
+        bool moved = await service.MoveUpAsync(id, request, cancellationToken);
+        return moved ? TypedResults.NoContent() : TypedResults.NotFound();
+    }
+
+    internal static async Task<Results<NoContent, NotFound, ValidationProblem>> MoveDownAsync(
+        int id,
+        LinearMotorMoveRequest request,
+        IValidator<LinearMotorMoveRequest> validator,
+        ILinearMotorMovementService service,
+        CancellationToken cancellationToken)
+    {
+        FluentValidation.Results.ValidationResult validation = await validator.ValidateAsync(request, cancellationToken);
+        if (!validation.IsValid)
+        {
+            return validation.ToValidationProblem();
+        }
+
+        bool moved = await service.MoveDownAsync(id, request, cancellationToken);
+        return moved ? TypedResults.NoContent() : TypedResults.NotFound();
+    }
+
+    private static LinearMotorAnalyzeRequest CreateDefaultAnalyzeRequest() =>
+        new(Filter: null, SortBy: null);
 }

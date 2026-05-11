@@ -1,0 +1,24 @@
+---
+description: Infrastructure repository rules
+globs: SolarTracker.Infrastructure/Repositories/**/*.cs
+alwaysApply: false
+---
+
+# Infrastructure Repositories
+
+- Each entity has its own concrete repository.
+- Repositories implement write operations only.
+- Allowed repository methods are `AddAsync`, `UpdateAsync`, and `DeleteAsync`.
+
+# Implementation Rules
+
+- Repository functionality must be implemented directly inside the concrete repository.
+- Do not introduce shared generic CRUD helper classes unless a dedicated rule explicitly allows them.
+- Use entity-specific persistence mappings.
+- Persist changes explicitly in each repository method.
+
+# Forbidden Patterns
+
+- Repositories must not expose `GetByIdAsync`, `ListAsync`, or `AnalyzeAsync`.
+- Repositories must not contain business rules.
+- Repositories must not return database entities outside `SolarTracker.Infrastructure`.

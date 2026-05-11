@@ -109,7 +109,7 @@ public sealed class LinearMotorAnalyzeRequestValidator : AbstractValidator<Linea
         {
             case LinearMotorAnalyzeField.Id:
 
-            case LinearMotorAnalyzeField.InstallationSiteId:
+            case LinearMotorAnalyzeField.SolarPanelId:
                 ValidateIntLeaf(leaf, context, path);
                 break;
 

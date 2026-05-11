@@ -1,0 +1,27 @@
+---
+description: Application layer rules
+globs: SolarTracker.Application/**/*.cs
+alwaysApply: false
+---
+
+# Application Layer
+
+- The Application layer contains use-case orchestration, DTOs, contracts, analysis models, and mappings between DTOs and domain entities.
+- The Application layer must not depend on HTTP, EF Core, GPIO, or other infrastructure concerns.
+
+# Services
+
+- Services exist for write use cases only.
+- Services may implement `AddAsync`, `UpdateAsync`, and `DeleteAsync`.
+- Services must not expose `GetByIdAsync`, `ListAsync`, or `AnalyzeAsync`.
+- Services must not contain transport logic or persistence-specific code.
+
+# Read Access
+
+- Read use cases must be exposed through dedicated query handler interfaces.
+- Query handler interfaces belong to `SolarTracker.Application`; concrete implementations belong to `SolarTracker.Infrastructure`.
+
+# Contracts
+
+- DTOs are transport-facing contracts and must remain free of business logic.
+- Validation rules belong in FluentValidation validators, not in DTOs.

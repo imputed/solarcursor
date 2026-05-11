@@ -1,0 +1,31 @@
+---
+description: Infrastructure persistence and EF Core rules
+globs: SolarTracker.Infrastructure/Persistence/**/*.cs, SolarTracker.Infrastructure/Migrations/**/*.cs, SolarTracker.Infrastructure/Repositories/**/*.cs, SolarTracker.Infrastructure/QueryHandlers/**/*.cs
+alwaysApply: false
+---
+
+# Infrastructure Persistence
+
+- Persistence is implemented with Entity Framework Core using the code-first approach.
+- Database entities exist only in `SolarTracker.Infrastructure`.
+- Domain entities must remain free of EF-specific annotations and dependencies.
+
+# Entity Configuration
+
+- Use `IEntityTypeConfiguration<T>` for schema configuration.
+- Define explicit string lengths for all persisted string properties.
+- Define explicit precision for decimal values such as coordinates.
+- Add indexes for foreign keys and frequently filtered or sorted columns.
+- Define uniqueness constraints explicitly where required, such as serial numbers.
+
+# Query Safety
+
+- Use `AsSplitQuery()` when loading large object graphs with multiple collections.
+- Nullability, defaults, and constraint changes must be handled intentionally.
+- Do not generate destructive migrations unless explicitly requested.
+
+# DbContext Access
+
+- When accessing a concrete dataset exposed by `SolarTrackerDbContext`, always use the named `DbSet` property instead of `dbContext.Set<T>()`.
+- Use `dbContext.InstallationSites`, `dbContext.SolarPanels`, `dbContext.LinearMotors`, `dbContext.TiltMeasuringUnits`, and `dbContext.CurrentMeasuringUnits` for concrete entity access.
+- Do not use `dbContext.Set<InstallationSiteDb>()`, `dbContext.Set<SolarPanelDb>()`, or equivalent generic access when a concrete `DbSet` property exists.

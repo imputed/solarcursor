@@ -6,7 +6,11 @@ public sealed class InstallationSite
 
     public required string Name { get; set; }
 
-    public ICollection<SolarPanel> SolarPanels { get; set; } = [];
+    public decimal Latitude { get; set; }
 
-    public ICollection<LinearMotor> LinearMotors { get; set; } = [];
+    public decimal Longitude { get; set; }
+
+    public TiltMeasuringUnit? TiltMeasuringUnit { get; set; }
+
+    public ICollection<SolarPanel> SolarPanels { get; set; } = [];
 }

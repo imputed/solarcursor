@@ -6,7 +6,11 @@ public sealed class InstallationSiteDb
 
     public required string Name { get; set; }
 
-    public ICollection<SolarPanelDb> SolarPanels { get; set; } = [];
+    public decimal Latitude { get; set; }
 
-    public ICollection<LinearMotorDb> LinearMotors { get; set; } = [];
+    public decimal Longitude { get; set; }
+
+    public TiltMeasuringUnitDb? TiltMeasuringUnit { get; set; }
+
+    public ICollection<SolarPanelDb> SolarPanels { get; set; } = [];
 }

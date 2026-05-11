@@ -1,66 +1,41 @@
 using Microsoft.EntityFrameworkCore;
-using SolarTracker.Application.Analysis;
 using SolarTracker.Application.Interfaces.Repositories;
 using SolarTracker.Domain.Entities;
-using SolarTracker.Infrastructure.Analysis;
 using SolarTracker.Infrastructure.Persistence;
 using SolarTracker.Infrastructure.Persistence.Entities;
 using SolarTracker.Infrastructure.Persistence.Mapping;
-using SolarTracker.Infrastructure.Repositories.Helper;
 
 namespace SolarTracker.Infrastructure.Repositories.Concrete;
 
 public sealed class LinearMotorRepository(SolarTrackerDbContext dbContext) : ILinearMotorRepository
 {
-    private readonly EfEntityCrudStore<LinearMotorDb> _store = new(dbContext);
-
-    public async ValueTask<LinearMotor?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+    public async ValueTask AddAsync(LinearMotor entity, CancellationToken cancellationToken)
     {
-        var row = await _store.GetByIdAsync(id, cancellationToken);
-        return row is null ? null : PersistenceMapper.ToDomainLinearMotor(row);
-    }
-
-    public async ValueTask<IReadOnlyList<LinearMotor>> AnalyzeAsync(
-        LinearMotorAnalyzeRequest request,
-        CancellationToken cancellationToken = default)
-    {
-        var queryable = dbContext.Set<LinearMotorDb>().AsNoTracking().AsQueryable();
-        queryable = queryable.ApplyAnalyze(request);
-        List<LinearMotorDb> rows = await queryable.ToListAsync(cancellationToken);
-        return rows.Select(PersistenceMapper.ToDomainLinearMotor).ToList();
-    }
-
-    public async ValueTask<IReadOnlyList<LinearMotor>> ListAsync(CancellationToken cancellationToken = default)
-    {
-        var rows = await _store.ListAsync(cancellationToken);
-        return rows.Select(PersistenceMapper.ToDomainLinearMotor).ToList();
-    }
-
-    public async ValueTask AddAsync(LinearMotor entity, CancellationToken cancellationToken = default)
-    {
-        var row = PersistenceMapper.ToDbLinearMotor(entity);
-        await _store.AddAsync(row, cancellationToken);
+        var row = LinearMotorPersistenceMapping.ToDb(entity);
+        await dbContext.LinearMotors.AddAsync(row, cancellationToken);
+        await dbContext.SaveChangesAsync(cancellationToken);
         entity.Id = row.Id;
     }
 
-    public async ValueTask UpdateAsync(LinearMotor entity, CancellationToken cancellationToken = default)
+    public async ValueTask UpdateAsync(LinearMotor entity, CancellationToken cancellationToken)
     {
-        var row = await dbContext.Set<LinearMotorDb>().FindAsync([entity.Id], cancellationToken);
+        var row = await dbContext.LinearMotors.FindAsync([entity.Id], cancellationToken);
         if (row is null)
         {
             return;
         }
 
-        PersistenceMapper.CopyLinearMotorScalars(row, entity);
+        LinearMotorPersistenceMapping.CopyScalars(row, entity);
         await dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async ValueTask DeleteAsync(LinearMotor entity, CancellationToken cancellationToken = default)
+    public async ValueTask DeleteAsync(int id, CancellationToken cancellationToken)
     {
-        var row = await _store.GetByIdAsync(entity.Id, cancellationToken);
+        var row = await dbContext.LinearMotors.FindAsync([id], cancellationToken);
         if (row is not null)
         {
-            await _store.DeleteAsync(row, cancellationToken);
+            dbContext.LinearMotors.Remove(row);
+            await dbContext.SaveChangesAsync(cancellationToken);
         }
     }
 }
