@@ -13,24 +13,25 @@ using SolarTracker.Domain.ValueObjects;
 
 namespace SolarTracker.Infrastructure.Calculators;
 
-public sealed class SolarmoduleCalculator(
+public sealed class SolarPanelCalculator(
     ISolarPanelQueryHandler solarPanelQueryHandler,
     IInstallationSiteQueryHandler installationSiteQueryHandler,
     ISolarTrackingConfigurationRepository configurationRepository,
     ILinearMotorMovementService linearMotorMovementService,
     ITiltMeasuringUnitPositionReader tiltMeasuringUnitPositionReader,
     TimeProvider timeProvider,
-    ILogger<SolarmoduleCalculator> logger) : ISolarmoduleCalculator
+    ILogger<SolarPanelCalculator> logger) : ISolarPanelCalculator
 {
     public async ValueTask<Result<SolarPanelCurrentPositionDto>> GetCurrentPositionAsync(
         int solarPanelId,
         CancellationToken cancellationToken)
     {
-        Result<SolarmoduleCalculationContext> contextResult = await BuildContextAsync(solarPanelId, cancellationToken);
+        Result<SolarPanelCalculationContext> contextResult = await BuildContextAsync(solarPanelId, cancellationToken);
         if (!contextResult.IsSuccess)
-            return Result<SolarPanelCurrentPositionDto>.NotFound(
-                contextResult.Error!.Code,
-                contextResult.Error.Message);
+        {
+            ResultError error = contextResult.Error!.Value;
+            return Result<SolarPanelCurrentPositionDto>.NotFound(error.Code, error.Message);
+        }
 
         return Result<SolarPanelCurrentPositionDto>.Success(
             await CreateCurrentPositionDtoAsync(contextResult.Value, cancellationToken));
@@ -40,13 +41,14 @@ public sealed class SolarmoduleCalculator(
         int solarPanelId,
         CancellationToken cancellationToken)
     {
-        Result<SolarmoduleCalculationContext> contextResult = await BuildContextAsync(solarPanelId, cancellationToken);
+        Result<SolarPanelCalculationContext> contextResult = await BuildContextAsync(solarPanelId, cancellationToken);
         if (!contextResult.IsSuccess)
-            return Result<SolarPanelCurrentPositionDto>.NotFound(
-                contextResult.Error!.Code,
-                contextResult.Error.Message);
+        {
+            ResultError error = contextResult.Error!.Value;
+            return Result<SolarPanelCurrentPositionDto>.NotFound(error.Code, error.Message);
+        }
 
-        SolarmoduleCalculationContext context = contextResult.Value;
+        SolarPanelCalculationContext context = contextResult.Value;
         SolarPanelCurrentPositionDto currentState = await CreateCurrentPositionDtoAsync(context, cancellationToken);
         for (int step = 0; step < context.Configuration.MaxAdjustmentSteps; step++)
         {
@@ -64,13 +66,12 @@ public sealed class SolarmoduleCalculator(
                     : await linearMotorMovementService.MoveDownAsync(linearMotor.Id, request, cancellationToken);
 
                 if (!moveResult.IsSuccess)
+                {
+                    ResultError error = moveResult.Error!.Value;
                     return moveResult.IsNotFound
-                        ? Result<SolarPanelCurrentPositionDto>.NotFound(
-                            moveResult.Error!.Code,
-                            moveResult.Error.Message)
-                        : Result<SolarPanelCurrentPositionDto>.Failure(
-                            moveResult.Error!.Code,
-                            moveResult.Error.Message);
+                        ? Result<SolarPanelCurrentPositionDto>.NotFound(error.Code, error.Message)
+                        : Result<SolarPanelCurrentPositionDto>.Failure(error.Code, error.Message);
+                }
             }
 
             currentState = await CreateCurrentPositionDtoAsync(context, cancellationToken);
@@ -85,41 +86,41 @@ public sealed class SolarmoduleCalculator(
             $"Solar panel {solarPanelId} did not reach the configured threshold in the allowed number of steps.");
     }
 
-    private async ValueTask<Result<SolarmoduleCalculationContext>> BuildContextAsync(
+    private async ValueTask<Result<SolarPanelCalculationContext>> BuildContextAsync(
         int solarPanelId,
         CancellationToken cancellationToken)
     {
         SolarPanel? solarPanel = await solarPanelQueryHandler.GetByIdAsync(solarPanelId, cancellationToken);
         if (solarPanel is null)
-            return Result<SolarmoduleCalculationContext>.NotFound(
+            return Result<SolarPanelCalculationContext>.NotFound(
                 "solar-panel-not-found",
                 $"Solar panel {solarPanelId} was not found.");
 
         if (solarPanel.TiltMeasuringUnit is null)
-            return Result<SolarmoduleCalculationContext>.Failure(
+            return Result<SolarPanelCalculationContext>.Failure(
                 "tilt-measuring-unit-missing",
                 $"Solar panel {solarPanelId} does not have a tilt measuring unit.");
 
         if (solarPanel.LinearMotors.Count == 0)
-            return Result<SolarmoduleCalculationContext>.Failure(
+            return Result<SolarPanelCalculationContext>.Failure(
                 "linear-motors-missing",
                 $"Solar panel {solarPanelId} does not have any linear motors.");
 
         InstallationSite? installationSite =
             await installationSiteQueryHandler.GetByIdAsync(solarPanel.InstallationSiteId, cancellationToken);
         if (installationSite is null)
-            return Result<SolarmoduleCalculationContext>.NotFound(
+            return Result<SolarPanelCalculationContext>.NotFound(
                 "installation-site-not-found",
                 $"Installation site {solarPanel.InstallationSiteId} was not found.");
 
         SolarTrackingConfiguration configuration =
             await configurationRepository.GetBySolarPanelIdAsync(solarPanelId, cancellationToken);
-        return Result<SolarmoduleCalculationContext>.Success(
-            new SolarmoduleCalculationContext(solarPanel, installationSite, configuration));
+        return Result<SolarPanelCalculationContext>.Success(
+            new SolarPanelCalculationContext(solarPanel, installationSite, configuration));
     }
 
     private async ValueTask<SolarPanelCurrentPositionDto> CreateCurrentPositionDtoAsync(
-        SolarmoduleCalculationContext context,
+        SolarPanelCalculationContext context,
         CancellationToken cancellationToken)
     {
         TiltMeasurement measurement = await context.SolarPanel.TiltMeasuringUnit!
@@ -141,9 +142,4 @@ public sealed class SolarmoduleCalculator(
         SolarTimes solarTimes = new(now, new Angle(latitude), new Angle(longitude));
         return Math.Clamp((double)solarTimes.SolarZenith, 0d, 90d);
     }
-
-    private sealed record SolarmoduleCalculationContext(
-        SolarPanel SolarPanel,
-        InstallationSite InstallationSite,
-        SolarTrackingConfiguration Configuration);
 }

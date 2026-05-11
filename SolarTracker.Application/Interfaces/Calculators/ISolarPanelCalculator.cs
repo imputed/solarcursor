@@ -3,7 +3,7 @@ using SolarTracker.Application.Results;
 
 namespace SolarTracker.Application.Interfaces.Calculators;
 
-public interface ISolarmoduleCalculator
+public interface ISolarPanelCalculator
 {
     ValueTask<Result<SolarPanelCurrentPositionDto>> GetCurrentPositionAsync(
         int solarPanelId,

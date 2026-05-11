@@ -4,4 +4,5 @@
   <Project Path="SolarTracker.Domain/SolarTracker.Domain.csproj" />
   <Project Path="SolarTracker.Infrastructure/SolarTracker.Infrastructure.csproj" />
   <Project Path="SolarTracker.IoC/SolarTracker.IoC.csproj" />
+  <Project Path="SolarTracker.Tests/SolarTracker.Tests.csproj" />
 </Solution>

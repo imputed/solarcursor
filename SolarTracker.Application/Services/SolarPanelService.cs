@@ -9,7 +9,7 @@ namespace SolarTracker.Application.Interfaces.Services;
 
 public sealed class SolarPanelService(
     ISolarPanelRepository repository,
-    ISolarmoduleCalculator solarmoduleCalculator) : ISolarPanelService
+    ISolarPanelCalculator solarPanelCalculator) : ISolarPanelService
 {
     public async ValueTask<int> AddAsync(CreateSolarPanelDto dto, CancellationToken cancellationToken)
     {
@@ -27,12 +27,12 @@ public sealed class SolarPanelService(
     public ValueTask<Result<SolarPanelCurrentPositionDto>> GetCurrentPositionAsync(
         int id,
         CancellationToken cancellationToken) =>
-        solarmoduleCalculator.GetCurrentPositionAsync(id, cancellationToken);
+        solarPanelCalculator.GetCurrentPositionAsync(id, cancellationToken);
 
     public ValueTask<Result<SolarPanelCurrentPositionDto>> MoveToOptimumAsync(
         int id,
         CancellationToken cancellationToken) =>
-        solarmoduleCalculator.MoveToOptimumAsync(id, cancellationToken);
+        solarPanelCalculator.MoveToOptimumAsync(id, cancellationToken);
 
     public async ValueTask DeleteAsync(int id, CancellationToken cancellationToken)
         => await repository.DeleteAsync(id, cancellationToken);

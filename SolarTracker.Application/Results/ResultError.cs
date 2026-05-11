@@ -1,3 +1,3 @@
 namespace SolarTracker.Application.Results;
 
-public sealed record ResultError(string Code, string Message);
+public readonly record struct ResultError(string Code, string Message);

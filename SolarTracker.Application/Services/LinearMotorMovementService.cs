@@ -20,7 +20,10 @@ public sealed class LinearMotorMovementService(
         Result<LinearMotorMovementContext> contextResult =
             await BuildContextAsync(linearMotorId, request, cancellationToken);
         if (!contextResult.IsSuccess)
-            return Result.NotFound(contextResult.Error!.Code, contextResult.Error.Message);
+        {
+            ResultError error = contextResult.Error!.Value;
+            return Result.NotFound(error.Code, error.Message);
+        }
 
         await actuator.MoveUpAsync(contextResult.Value, cancellationToken);
         return Result.Success();
@@ -34,7 +37,10 @@ public sealed class LinearMotorMovementService(
         Result<LinearMotorMovementContext> contextResult =
             await BuildContextAsync(linearMotorId, request, cancellationToken);
         if (!contextResult.IsSuccess)
-            return Result.NotFound(contextResult.Error!.Code, contextResult.Error.Message);
+        {
+            ResultError error = contextResult.Error!.Value;
+            return Result.NotFound(error.Code, error.Message);
+        }
 
         await actuator.MoveDownAsync(contextResult.Value, cancellationToken);
         return Result.Success();

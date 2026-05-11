@@ -9,6 +9,8 @@ public static class ApplicationDependencyInjection
     {
         services.AddScoped<IInstallationSiteService, InstallationSiteService>();
         services.AddScoped<ISolarPanelService, SolarPanelService>();
+        services.AddScoped<ISolarPanelOptimizationStateService, SolarPanelOptimizationStateService>();
+        services.AddScoped<ISolarOptimizationScheduleConfigurationService, SolarOptimizationScheduleConfigurationService>();
         services.AddScoped<ISolarTrackingConfigurationService, SolarTrackingConfigurationService>();
         services.AddScoped<ILinearMotorService, LinearMotorService>();
         services.AddScoped<ITiltMeasuringUnitService, TiltMeasuringUnitService>();

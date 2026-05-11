@@ -17,6 +17,11 @@ public sealed class SolarTrackerDbContext(DbContextOptions<SolarTrackerDbContext
 
     public DbSet<SolarTrackingConfigurationDb> SolarTrackingConfigurations => Set<SolarTrackingConfigurationDb>();
 
+    public DbSet<SolarOptimizationScheduleConfigurationDb> SolarOptimizationScheduleConfigurations =>
+        Set<SolarOptimizationScheduleConfigurationDb>();
+
+    public DbSet<SolarPanelOptimizationStateDb> SolarPanelOptimizationStates => Set<SolarPanelOptimizationStateDb>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder) =>
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(SolarTrackerDbContext).Assembly);
 }
