@@ -1,0 +1,36 @@
+---
+description: Unit test expectations for non-trivial changes
+alwaysApply: true
+---
+
+# Unit Tests
+
+- For every non-trivial code change, explicitly evaluate whether unit tests must be added or updated.
+- The default expectation is to add or update unit tests for changed behavior, especially for business rules, validation, branching logic, calculations, mapping, orchestration, and bug fixes.
+- When fixing a bug, add a regression-focused unit test whenever the behavior can be verified in isolation.
+
+# Approved Test Stack
+
+- Use the existing `xUnit` and `Moq` stack for unit tests.
+- Use `xUnit` for test structure, facts, theories, and assertions.
+- Use `Moq` when a mock is needed; prefer simple fakes or stubs when they keep the test clearer.
+- Stay within the current `Microsoft.NET.Test.Sdk` and `coverlet.collector` setup.
+- Do not introduce alternative unit test frameworks, mocking libraries, assertion libraries, or coverage tools unless explicitly requested.
+
+# What Counts as a Unit Test
+
+- A unit test must stay isolated from real external dependencies.
+- Do not use a real database, HTTP, GPIO, filesystem, clock, or other real infrastructure in a unit test.
+- Use mocks, fakes, stubs, or other test doubles instead of integration-style setups.
+- Do not mix unit tests with integration or end-to-end techniques in the same test.
+
+# Test Structure
+
+- Unit tests must follow the Arrange/Act/Assert pattern.
+- Keep Arrange, Act, and Assert visually separated and easy to identify.
+- Keep each test focused on a single behavior and make the assertion intent obvious.
+
+# Execution and Exceptions
+
+- Run the most specific affected unit tests instead of defaulting to the entire test project.
+- If no unit test is added or executed for a non-trivial change, explicitly give a short concrete reason.
