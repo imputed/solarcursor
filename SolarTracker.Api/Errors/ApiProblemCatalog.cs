@@ -29,7 +29,7 @@ internal static class ApiProblemCatalog
     private const string TiltMeasuringUnitPersistenceFailedTitle = "Tilt measuring unit persistence failed";
     private const string TiltMeasuringUnitPersistenceFailedDetailTemplate =
         "Tilt measuring unit {0} could not be loaded after creation.";
-    private const string SolarPanelMovementFailedTitle = "Solar panel movement failed";
+    private const string InstallationSiteMovementFailedTitle = "Installation site movement failed";
 
     internal static Dictionary<string, string[]> RouteIdMustEqualBodyId() =>
         new()
@@ -74,6 +74,6 @@ internal static class ApiProblemCatalog
             string.Format(CultureInfo.InvariantCulture, TiltMeasuringUnitPersistenceFailedDetailTemplate, tiltMeasuringUnitId)
         );
 
-    internal static (string Title, string Detail) SolarPanelMovementFailed(string detail) =>
-        (SolarPanelMovementFailedTitle, detail);
+    internal static (string Title, string Detail) InstallationSiteMovementFailed(string detail) =>
+        (InstallationSiteMovementFailedTitle, detail);
 }

@@ -13,6 +13,8 @@ namespace SolarTracker.Api.Serialization;
 [JsonSerializable(typeof(List<InstallationSiteDto>))]
 [JsonSerializable(typeof(SolarPanelDto))]
 [JsonSerializable(typeof(SolarPanelCurrentPositionDto))]
+[JsonSerializable(typeof(IReadOnlyList<SolarPanelCurrentPositionDto>))]
+[JsonSerializable(typeof(List<SolarPanelCurrentPositionDto>))]
 [JsonSerializable(typeof(SolarPanelOptimizationStateDto))]
 [JsonSerializable(typeof(CreateSolarPanelDto))]
 [JsonSerializable(typeof(UpdateSolarPanelOptimizationStateDto))]

@@ -11,7 +11,5 @@ public interface ISolarPanelService
 
     ValueTask<Result<SolarPanelCurrentPositionDto>> GetCurrentPositionAsync(int id, CancellationToken cancellationToken);
 
-    ValueTask<Result<SolarPanelCurrentPositionDto>> MoveToOptimumAsync(int id, CancellationToken cancellationToken);
-
     ValueTask DeleteAsync(int id, CancellationToken cancellationToken);
 }

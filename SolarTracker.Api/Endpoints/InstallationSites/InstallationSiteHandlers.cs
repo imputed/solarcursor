@@ -6,6 +6,7 @@ using SolarTracker.Application.Dtos;
 using SolarTracker.Application.Interfaces.QueryHandlers;
 using SolarTracker.Application.Interfaces.Services;
 using SolarTracker.Application.Mapping;
+using SolarTracker.Application.Results;
 using SolarTracker.Api.Errors;
 using SolarTracker.Api.Infrastructure;
 using SolarTracker.Api.Logging;
@@ -38,6 +39,29 @@ internal static class InstallationSiteHandlers
     {
         InstallationSite? entity = await queryHandler.GetByIdAsync(id, cancellationToken);
         return entity is null ? TypedResults.NotFound() : TypedResults.Ok(InstallationSiteMapping.ToDto(entity));
+    }
+
+    internal static async Task<Results<Ok<IReadOnlyList<SolarPanelCurrentPositionDto>>, NotFound, ProblemHttpResult>> MoveToOptimumAsync(
+        int id,
+        IInstallationSiteService service,
+        ILoggerFactory loggerFactory,
+        CancellationToken cancellationToken)
+    {
+        Result<IReadOnlyList<SolarPanelCurrentPositionDto>> result = await service.MoveToOptimumAsync(id, cancellationToken);
+        if (result.IsSuccess)
+            return TypedResults.Ok(result.Value);
+
+        if (result.IsNotFound)
+            return TypedResults.NotFound();
+
+        ResultError error = result.Error!.Value;
+        ILogger logger = loggerFactory.CreateLogger(typeof(InstallationSiteHandlers).FullName!);
+        ApiLog.InstallationSiteMoveToOptimumConflict(logger, id, error.Code, error.Message);
+        var problem = ApiProblemCatalog.InstallationSiteMovementFailed(error.Message);
+        return TypedResults.Problem(
+            title: problem.Title,
+            detail: problem.Detail,
+            statusCode: StatusCodes.Status409Conflict);
     }
 
     internal static async Task<Results<Created<InstallationSiteDto>, ValidationProblem, ProblemHttpResult>> CreateAsync(

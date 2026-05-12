@@ -24,12 +24,6 @@ internal static class SolarPanelEndpoints
             .Produces<SolarPanelCurrentPositionDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound);
 
-        group.MapPost("/{id:int}/move-to-optimum", SolarPanelHandlers.MoveToOptimumAsync)
-            .WithName("MoveSolarPanelToOptimum")
-            .Produces<SolarPanelCurrentPositionDto>(StatusCodes.Status200OK)
-            .ProducesProblem(StatusCodes.Status409Conflict)
-            .Produces(StatusCodes.Status404NotFound);
-
         group.MapPost("/", SolarPanelHandlers.CreateAsync)
             .WithName("CreateSolarPanel")
             .Produces<SolarPanelDto>(StatusCodes.Status201Created)

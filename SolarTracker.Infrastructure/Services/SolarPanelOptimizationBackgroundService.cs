@@ -1,7 +1,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using SolarTracker.Application.Errors;
 using SolarTracker.Application.Dtos;
+using SolarTracker.Application.Interfaces.QueryHandlers;
 using SolarTracker.Application.Interfaces.Repositories;
 using SolarTracker.Application.Interfaces.Services;
 using SolarTracker.Application.Results;
@@ -27,7 +29,8 @@ public sealed class SolarPanelOptimizationBackgroundService(
                     scope.ServiceProvider.GetRequiredService<ISolarOptimizationScheduleConfigurationRepository>();
                 var stateRepository =
                     scope.ServiceProvider.GetRequiredService<ISolarPanelOptimizationStateRepository>();
-                var solarPanelService = scope.ServiceProvider.GetRequiredService<ISolarPanelService>();
+                var solarPanelQueryHandler = scope.ServiceProvider.GetRequiredService<ISolarPanelQueryHandler>();
+                var installationSiteService = scope.ServiceProvider.GetRequiredService<IInstallationSiteService>();
 
                 SolarOptimizationScheduleConfiguration schedule =
                     await scheduleRepository.GetAsync(stoppingToken);
@@ -35,15 +38,33 @@ public sealed class SolarPanelOptimizationBackgroundService(
 
                 IReadOnlyList<int> solarPanelIds =
                     await stateRepository.ListEnabledSolarPanelIdsAsync(stoppingToken);
+                HashSet<int> installationSiteIds = [];
 
                 foreach (int solarPanelId in solarPanelIds)
                 {
-                    Result result = await OptimizeAsync(solarPanelService, solarPanelId, stoppingToken);
+                    SolarPanel? solarPanel = await solarPanelQueryHandler.GetByIdAsync(solarPanelId, stoppingToken);
+                    if (solarPanel is not null)
+                    {
+                        installationSiteIds.Add(solarPanel.InstallationSiteId);
+                        continue;
+                    }
+
+                    ResultError error = SolarTrackerErrorCatalog.SolarPanel.NotFound(solarPanelId);
+                    InfrastructureLog.AutomaticOptimizationFailed(logger, solarPanelId, error.Code, error.Message);
+                }
+
+                foreach (int installationSiteId in installationSiteIds.Order())
+                {
+                    Result result = await OptimizeAsync(installationSiteService, installationSiteId, stoppingToken);
                     if (result.IsSuccess)
                         continue;
 
                     ResultError error = result.Error!.Value;
-                    InfrastructureLog.AutomaticOptimizationFailed(logger, solarPanelId, error.Code, error.Message);
+                    InfrastructureLog.AutomaticInstallationSiteOptimizationFailed(
+                        logger,
+                        installationSiteId,
+                        error.Code,
+                        error.Message);
                 }
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
@@ -67,12 +88,12 @@ public sealed class SolarPanelOptimizationBackgroundService(
     }
 
     private static async ValueTask<Result> OptimizeAsync(
-        ISolarPanelService solarPanelService,
-        int solarPanelId,
+        IInstallationSiteService installationSiteService,
+        int installationSiteId,
         CancellationToken cancellationToken)
     {
-        Result<SolarPanelCurrentPositionDto> result =
-            await solarPanelService.MoveToOptimumAsync(solarPanelId, cancellationToken);
+        Result<IReadOnlyList<SolarPanelCurrentPositionDto>> result =
+            await installationSiteService.MoveToOptimumAsync(installationSiteId, cancellationToken);
         return result.IsSuccess
             ? Result.Success()
             : result.IsNotFound

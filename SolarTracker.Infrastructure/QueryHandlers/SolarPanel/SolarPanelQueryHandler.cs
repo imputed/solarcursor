@@ -15,6 +15,7 @@ public sealed class SolarPanelQueryHandler(SolarTrackerDbContext dbContext) : IS
     {
         var row = await dbContext.SolarPanels
             .AsNoTracking()
+            .Include(panel => panel.InstallationSite)
             .Include(panel => panel.TiltMeasuringUnit)
             .Include(panel => panel.CurrentMeasuringUnit)
             .Include(panel => panel.LinearMotors)

@@ -6,7 +6,6 @@ using SolarTracker.Domain.Abstractions;
 using SolarTracker.Domain.Entities;
 using SolarTracker.Domain.ValueObjects;
 using SolarTracker.Infrastructure.Calculators;
-using SolarTracker.Infrastructure.Services;
 
 namespace SolarTracker.Tests.UnitTests.Infrastructure.Calculators;
 
@@ -66,15 +65,12 @@ public sealed class SolarPanelCalculatorUnitTests
         receiver.Setup(x => x.StopAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .Returns(ValueTask.CompletedTask);
 
-        LinearMotorMovementService movementService = new(
-            linearMotorQueryHandler.Object,
-            receiver.Object,
-            Mock.Of<ILogger<LinearMotorMovementService>>());
         SolarPanelCalculator calculator = new(
             solarPanelQueryHandler.Object,
             installationSiteQueryHandler.Object,
+            linearMotorQueryHandler.Object,
             configurationRepository.Object,
-            movementService,
+            receiver.Object,
             tiltMeasuringUnitPositionReader.Object,
             solarOptimalPositionCalculator.Object,
             new FixedTimeProvider(new DateTimeOffset(2026, 12, 21, 0, 0, 0, TimeSpan.Zero)),
@@ -153,15 +149,12 @@ public sealed class SolarPanelCalculatorUnitTests
         receiver.Setup(x => x.StopAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .Returns(ValueTask.CompletedTask);
 
-        LinearMotorMovementService movementService = new(
-            linearMotorQueryHandler.Object,
-            receiver.Object,
-            Mock.Of<ILogger<LinearMotorMovementService>>());
         SolarPanelCalculator calculator = new(
             solarPanelQueryHandler.Object,
             installationSiteQueryHandler.Object,
+            linearMotorQueryHandler.Object,
             configurationRepository.Object,
-            movementService,
+            receiver.Object,
             tiltMeasuringUnitPositionReader.Object,
             solarOptimalPositionCalculator.Object,
             new FixedTimeProvider(new DateTimeOffset(2026, 12, 21, 0, 0, 0, TimeSpan.Zero)),

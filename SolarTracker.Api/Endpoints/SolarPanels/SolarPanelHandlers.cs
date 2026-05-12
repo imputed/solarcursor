@@ -50,29 +50,6 @@ internal static class SolarPanelHandlers
         return result.IsSuccess ? TypedResults.Ok(result.Value) : TypedResults.NotFound();
     }
 
-    internal static async Task<Results<Ok<SolarPanelCurrentPositionDto>, NotFound, ProblemHttpResult>> MoveToOptimumAsync(
-        int id,
-        ISolarPanelService service,
-        ILoggerFactory loggerFactory,
-        CancellationToken cancellationToken)
-    {
-        Result<SolarPanelCurrentPositionDto> result = await service.MoveToOptimumAsync(id, cancellationToken);
-        if (result.IsSuccess)
-            return TypedResults.Ok(result.Value);
-
-        if (result.IsNotFound)
-            return TypedResults.NotFound();
-
-        ResultError error = result.Error!.Value;
-        ILogger logger = loggerFactory.CreateLogger(typeof(SolarPanelHandlers).FullName!);
-        ApiLog.SolarPanelMoveToOptimumConflict(logger, id, error.Code, error.Message);
-        var problem = ApiProblemCatalog.SolarPanelMovementFailed(error.Message);
-        return TypedResults.Problem(
-            title: problem.Title,
-            detail: problem.Detail,
-            statusCode: StatusCodes.Status409Conflict);
-    }
-
     internal static async Task<Results<Created<SolarPanelDto>, ValidationProblem, ProblemHttpResult>> CreateAsync(
         CreateSolarPanelDto dto,
         IValidator<CreateSolarPanelDto> validator,

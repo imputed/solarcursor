@@ -21,6 +21,13 @@ internal static partial class InfrastructureLog
     [LoggerMessage(EventId = 2003, Level = LogLevel.Error, Message = "Automatic solar panel optimization loop failed.")]
     internal static partial void AutomaticOptimizationLoopFailed(ILogger logger, Exception exception);
 
+    [LoggerMessage(EventId = 2010, Level = LogLevel.Warning, Message = "Automatic optimization failed for installation site {InstallationSiteId}. {Code}: {Message}")]
+    internal static partial void AutomaticInstallationSiteOptimizationFailed(
+        ILogger logger,
+        int installationSiteId,
+        string code,
+        string message);
+
     [LoggerMessage(EventId = 2004, Level = LogLevel.Information, Message = "Sending {Direction} command to steering pins up={MoveUpPin} down={MoveDownPin}.")]
     internal static partial void SendingSteeringCommand(
         ILogger logger,

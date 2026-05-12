@@ -19,6 +19,12 @@ internal static class InstallationSiteEndpoints
             .Produces<InstallationSiteDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound);
 
+        group.MapPost("/{id:int}/move-to-optimum", InstallationSiteHandlers.MoveToOptimumAsync)
+            .WithName("MoveInstallationSiteToOptimum")
+            .Produces<IReadOnlyList<SolarPanelCurrentPositionDto>>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status409Conflict)
+            .Produces(StatusCodes.Status404NotFound);
+
         group.MapPost("/", InstallationSiteHandlers.CreateAsync)
             .WithName("CreateInstallationSite")
             .Produces<InstallationSiteDto>(StatusCodes.Status201Created)

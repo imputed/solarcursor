@@ -36,20 +36,6 @@ internal static partial class ApplicationLog
         string code,
         string message);
 
-    [LoggerMessage(EventId = 1008, Level = LogLevel.Information, Message = "MoveToOptimum completed for solar panel {SolarPanelId}. Current {CurrentPosition}, optimal {OptimalPosition}.")]
-    internal static partial void SolarPanelMoveToOptimumCompleted(
-        ILogger logger,
-        int solarPanelId,
-        double currentPosition,
-        double optimalPosition);
-
-    [LoggerMessage(EventId = 1009, Level = LogLevel.Warning, Message = "MoveToOptimum failed for solar panel {SolarPanelId}. {Code}: {Message}")]
-    internal static partial void SolarPanelMoveToOptimumFailed(
-        ILogger logger,
-        int solarPanelId,
-        string code,
-        string message);
-
     [LoggerMessage(EventId = 1010, Level = LogLevel.Information, Message = "Created linear motor {LinearMotorId} for solar panel {SolarPanelId}.")]
     internal static partial void CreatedLinearMotor(ILogger logger, int linearMotorId, int solarPanelId);
 
@@ -105,4 +91,14 @@ internal static partial class ApplicationLog
 
     [LoggerMessage(EventId = 1026, Level = LogLevel.Information, Message = "Updated solar optimization schedule configuration. Interval {IntervalMinutes} minutes.")]
     internal static partial void UpdatedSolarOptimizationScheduleConfiguration(ILogger logger, int intervalMinutes);
+
+    [LoggerMessage(EventId = 1027, Level = LogLevel.Information, Message = "MoveToOptimum completed for installation site {InstallationSiteId} across {SolarPanelCount} solar panels.")]
+    internal static partial void InstallationSiteMoveToOptimumCompleted(ILogger logger, int installationSiteId, int solarPanelCount);
+
+    [LoggerMessage(EventId = 1028, Level = LogLevel.Warning, Message = "MoveToOptimum failed for installation site {InstallationSiteId}. {Code}: {Message}")]
+    internal static partial void InstallationSiteMoveToOptimumFailed(
+        ILogger logger,
+        int installationSiteId,
+        string code,
+        string message);
 }

@@ -8,12 +8,41 @@ using SolarTracker.Api.Endpoints.InstallationSites;
 using SolarTracker.Application.Dtos;
 using SolarTracker.Application.Interfaces.QueryHandlers;
 using SolarTracker.Application.Interfaces.Services;
+using SolarTracker.Application.Results;
 using SolarTracker.Domain.Entities;
 
 namespace SolarTracker.Tests.UnitTests.Api.Endpoints.InstallationSites;
 
 public sealed class InstallationSiteHandlersUnitTests
 {
+    [Fact]
+    public async Task MoveToOptimumAsync_ShouldReturnProblem_WhenServiceReturnsFailure()
+    {
+        // Arrange
+        CancellationToken cancellationToken = new CancellationTokenSource().Token;
+        Mock<IInstallationSiteService> service = new();
+        Mock<ILoggerFactory> loggerFactory = new();
+        loggerFactory.Setup(x => x.CreateLogger(It.IsAny<string>()))
+            .Returns((ILogger)NullLogger.Instance);
+        service.Setup(x => x.MoveToOptimumAsync(7, cancellationToken))
+            .Returns(ValueTask.FromResult(
+                Result<IReadOnlyList<SolarPanelCurrentPositionDto>>.Failure(
+                    "solar-panel-threshold-not-met",
+                    "Solar panel 12 did not reach the configured threshold in the allowed number of steps.")));
+
+        // Act
+        var result = await InstallationSiteHandlers.MoveToOptimumAsync(
+            7,
+            service.Object,
+            loggerFactory.Object,
+            cancellationToken);
+
+        // Assert
+        ProblemHttpResult problem = Assert.IsType<ProblemHttpResult>(result.Result);
+        Assert.Equal(StatusCodes.Status409Conflict, problem.StatusCode);
+        Assert.Equal("Installation site movement failed", problem.ProblemDetails.Title);
+    }
+
     [Fact]
     public async Task CreateAsync_ShouldReturnProblem_WhenEntityCannotBeLoadedAfterCreate()
     {
