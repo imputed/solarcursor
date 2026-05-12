@@ -1,54 +1,61 @@
 using System.Device.Gpio;
 using Microsoft.Extensions.Logging;
-using SolarTracker.Application.Interfaces.Hardware;
-using SolarTracker.Domain.Entities;
+using SolarTracker.Domain.Abstractions;
 using SolarTracker.Infrastructure.Logging;
 
 namespace SolarTracker.Infrastructure.Hardware;
 
-public sealed class RaspberryPiLinearMotorActuator(ILogger<RaspberryPiLinearMotorActuator> logger) : ILinearMotorActuator
+public sealed class RaspberryPiLinearMotorActuator(ILogger<RaspberryPiLinearMotorActuator> logger) : ISteeringCommandReceiver
 {
-    public ValueTask MoveUpAsync(LinearMotor linearMotor, int durationMs, CancellationToken cancellationToken) =>
-        DriveAsync(linearMotor, linearMotor.MoveUpGpioPin, linearMotor.MoveDownGpioPin, durationMs, "MoveUp", cancellationToken);
+    public ValueTask MoveUpAsync(int moveUpPin, int moveDownPin, CancellationToken cancellationToken) =>
+        DriveAsync(moveUpPin, moveDownPin, moveUpPin, "MoveUp", cancellationToken);
 
-    public ValueTask MoveDownAsync(LinearMotor linearMotor, int durationMs, CancellationToken cancellationToken) =>
-        DriveAsync(linearMotor, linearMotor.MoveDownGpioPin, linearMotor.MoveUpGpioPin, durationMs, "MoveDown", cancellationToken);
+    public ValueTask MoveDownAsync(int moveUpPin, int moveDownPin, CancellationToken cancellationToken) =>
+        DriveAsync(moveUpPin, moveDownPin, moveDownPin, "MoveDown", cancellationToken);
 
-    private async ValueTask DriveAsync(
-        LinearMotor linearMotor,
+    public ValueTask StopAsync(int moveUpPin, int moveDownPin, CancellationToken cancellationToken) =>
+        StopPinsAsync(moveUpPin, moveDownPin, cancellationToken);
+
+    private ValueTask DriveAsync(
+        int moveUpPin,
+        int moveDownPin,
         int activePin,
-        int inactivePin,
-        int durationMs,
         string direction,
         CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         using var controller = new GpioController();
 
-        OpenOutputPin(controller, activePin);
-        OpenOutputPin(controller, inactivePin);
+        OpenOutputPin(controller, moveUpPin);
+        OpenOutputPin(controller, moveDownPin);
 
-        controller.Write(inactivePin, PinValue.Low);
-        controller.Write(activePin, PinValue.Low);
+        controller.Write(moveUpPin, PinValue.Low);
+        controller.Write(moveDownPin, PinValue.Low);
 
-        InfrastructureLog.DrivingLinearMotor(
+        InfrastructureLog.SendingSteeringCommand(
             logger,
             direction,
-            linearMotor.Id,
-            linearMotor.SolarPanelId,
-            activePin,
-            durationMs);
+            moveUpPin,
+            moveDownPin);
 
         controller.Write(activePin, PinValue.High);
+        return ValueTask.CompletedTask;
+    }
 
-        try
-        {
-            await Task.Delay(durationMs, cancellationToken);
-        }
-        finally
-        {
-            controller.Write(activePin, PinValue.Low);
-            controller.Write(inactivePin, PinValue.Low);
-        }
+    private ValueTask StopPinsAsync(int moveUpPin, int moveDownPin, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        using var controller = new GpioController();
+
+        OpenOutputPin(controller, moveUpPin);
+        OpenOutputPin(controller, moveDownPin);
+
+        InfrastructureLog.SendingSteeringCommand(logger, "Stop", moveUpPin, moveDownPin);
+        controller.Write(moveUpPin, PinValue.Low);
+        controller.Write(moveDownPin, PinValue.Low);
+        return ValueTask.CompletedTask;
     }
 
     private static void OpenOutputPin(GpioController controller, int pinNumber)

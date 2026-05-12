@@ -21,20 +21,21 @@ internal static partial class InfrastructureLog
     [LoggerMessage(EventId = 2003, Level = LogLevel.Error, Message = "Automatic solar panel optimization loop failed.")]
     internal static partial void AutomaticOptimizationLoopFailed(ILogger logger, Exception exception);
 
-    [LoggerMessage(EventId = 2004, Level = LogLevel.Information, Message = "Driving linear motor {LinearMotorId} for solar panel {SolarPanelId} in direction {Direction} using GPIO pin {ActivePin} for {DurationMs} ms.")]
-    internal static partial void DrivingLinearMotor(
+    [LoggerMessage(EventId = 2004, Level = LogLevel.Information, Message = "Sending {Direction} command to steering pins up={MoveUpPin} down={MoveDownPin}.")]
+    internal static partial void SendingSteeringCommand(
         ILogger logger,
         string direction,
-        int linearMotorId,
-        int solarPanelId,
-        int activePin,
-        int durationMs);
+        int moveUpPin,
+        int moveDownPin);
 
-    [LoggerMessage(EventId = 2005, Level = LogLevel.Debug, Message = "Simulating MoveUp for linear motor {LinearMotorId} on pin {MoveUpPin} for {DurationMs} ms.")]
-    internal static partial void SimulatingMoveUp(ILogger logger, int linearMotorId, int moveUpPin, int durationMs);
+    [LoggerMessage(EventId = 2005, Level = LogLevel.Debug, Message = "Simulating MoveUp for steering pins up={MoveUpPin} down={MoveDownPin}.")]
+    internal static partial void SimulatingMoveUp(ILogger logger, int moveUpPin, int moveDownPin);
 
-    [LoggerMessage(EventId = 2006, Level = LogLevel.Debug, Message = "Simulating MoveDown for linear motor {LinearMotorId} on pin {MoveDownPin} for {DurationMs} ms.")]
-    internal static partial void SimulatingMoveDown(ILogger logger, int linearMotorId, int moveDownPin, int durationMs);
+    [LoggerMessage(EventId = 2006, Level = LogLevel.Debug, Message = "Simulating MoveDown for steering pins up={MoveUpPin} down={MoveDownPin}.")]
+    internal static partial void SimulatingMoveDown(ILogger logger, int moveUpPin, int moveDownPin);
+
+    [LoggerMessage(EventId = 2012, Level = LogLevel.Debug, Message = "Simulating Stop for steering pins up={MoveUpPin} down={MoveDownPin}.")]
+    internal static partial void SimulatingStop(ILogger logger, int moveUpPin, int moveDownPin);
 
     [LoggerMessage(EventId = 2007, Level = LogLevel.Debug, Message = "Read tilt {Degrees} degrees from measuring unit {TiltMeasuringUnitId} on GPIO pin {GpioPin}.")]
     internal static partial void ReadTiltPosition(ILogger logger, double degrees, int tiltMeasuringUnitId, int gpioPin);
@@ -45,12 +46,4 @@ internal static partial class InfrastructureLog
     [LoggerMessage(EventId = 2009, Level = LogLevel.Warning, Message = "Linear motor {LinearMotorId} was not found while building the movement context.")]
     internal static partial void LinearMotorNotFound(ILogger logger, int linearMotorId);
 
-    [LoggerMessage(EventId = 2010, Level = LogLevel.Warning, Message = "Solar panel {SolarPanelId} for linear motor {LinearMotorId} was not found while building the movement context.")]
-    internal static partial void SolarPanelNotFoundForLinearMotor(ILogger logger, int solarPanelId, int linearMotorId);
-
-    [LoggerMessage(EventId = 2011, Level = LogLevel.Warning, Message = "Installation site {InstallationSiteId} for linear motor {LinearMotorId} was not found while building the movement context.")]
-    internal static partial void InstallationSiteNotFoundForLinearMotor(
-        ILogger logger,
-        int installationSiteId,
-        int linearMotorId);
 }

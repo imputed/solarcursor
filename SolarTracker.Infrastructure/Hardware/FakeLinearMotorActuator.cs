@@ -1,23 +1,29 @@
 using Microsoft.Extensions.Logging;
-using SolarTracker.Application.Interfaces.Hardware;
-using SolarTracker.Domain.Entities;
+using SolarTracker.Domain.Abstractions;
 using SolarTracker.Infrastructure.Logging;
 
 namespace SolarTracker.Infrastructure.Hardware;
 
-public sealed class FakeLinearMotorActuator(ILogger<FakeLinearMotorActuator> logger) : ILinearMotorActuator
+public sealed class FakeLinearMotorActuator(ILogger<FakeLinearMotorActuator> logger) : ISteeringCommandReceiver
 {
-    public async ValueTask MoveUpAsync(LinearMotor linearMotor, int durationMs, CancellationToken cancellationToken)
+    public ValueTask MoveUpAsync(int moveUpPin, int moveDownPin, CancellationToken cancellationToken)
     {
-        InfrastructureLog.SimulatingMoveUp(logger, linearMotor.Id, linearMotor.MoveUpGpioPin, durationMs);
-
-        await Task.Delay(durationMs, cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
+        InfrastructureLog.SimulatingMoveUp(logger, moveUpPin, moveDownPin);
+        return ValueTask.CompletedTask;
     }
 
-    public async ValueTask MoveDownAsync(LinearMotor linearMotor, int durationMs, CancellationToken cancellationToken)
+    public ValueTask MoveDownAsync(int moveUpPin, int moveDownPin, CancellationToken cancellationToken)
     {
-        InfrastructureLog.SimulatingMoveDown(logger, linearMotor.Id, linearMotor.MoveDownGpioPin, durationMs);
+        cancellationToken.ThrowIfCancellationRequested();
+        InfrastructureLog.SimulatingMoveDown(logger, moveUpPin, moveDownPin);
+        return ValueTask.CompletedTask;
+    }
 
-        await Task.Delay(durationMs, cancellationToken);
+    public ValueTask StopAsync(int moveUpPin, int moveDownPin, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        InfrastructureLog.SimulatingStop(logger, moveUpPin, moveDownPin);
+        return ValueTask.CompletedTask;
     }
 }

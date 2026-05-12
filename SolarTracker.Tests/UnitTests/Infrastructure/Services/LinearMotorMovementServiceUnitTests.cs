@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Moq;
-using SolarTracker.Application.Interfaces.Hardware;
 using SolarTracker.Application.Interfaces.QueryHandlers;
+using SolarTracker.Domain.Abstractions;
 using SolarTracker.Domain.Entities;
 using SolarTracker.Infrastructure.Services;
 
@@ -15,17 +15,13 @@ public sealed class LinearMotorMovementServiceUnitTests
         // Arrange
         CancellationToken cancellationToken = new CancellationTokenSource().Token;
         Mock<ILinearMotorQueryHandler> linearMotorQueryHandler = new();
-        Mock<ISolarPanelQueryHandler> solarPanelQueryHandler = new();
-        Mock<IInstallationSiteQueryHandler> installationSiteQueryHandler = new();
-        Mock<ILinearMotorActuator> actuator = new();
+        Mock<ISteeringCommandReceiver> receiver = new();
         linearMotorQueryHandler.Setup(x => x.GetByIdAsync(4, cancellationToken))
             .Returns(ValueTask.FromResult<LinearMotor?>(null));
 
         LinearMotorMovementService service = new(
             linearMotorQueryHandler.Object,
-            solarPanelQueryHandler.Object,
-            installationSiteQueryHandler.Object,
-            actuator.Object,
+            receiver.Object,
             Mock.Of<ILogger<LinearMotorMovementService>>());
 
         // Act
@@ -34,167 +30,83 @@ public sealed class LinearMotorMovementServiceUnitTests
         // Assert
         Assert.True(result.IsNotFound);
         Assert.Equal("linear-motor-not-found", result.Error?.Code);
-        actuator.Verify(x => x.MoveUpAsync(It.IsAny<LinearMotor>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
+        receiver.Verify(x => x.MoveUpAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
+        receiver.Verify(x => x.StopAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
-    public async Task MoveUpAsync_ShouldReturnNotFound_WhenSolarPanelDoesNotExist()
+    public async Task MoveUpAsync_ShouldSendMoveAndStopCommands_WhenLinearMotorExists()
     {
         // Arrange
         CancellationToken cancellationToken = new CancellationTokenSource().Token;
         Mock<ILinearMotorQueryHandler> linearMotorQueryHandler = new();
-        Mock<ISolarPanelQueryHandler> solarPanelQueryHandler = new();
-        Mock<IInstallationSiteQueryHandler> installationSiteQueryHandler = new();
-        Mock<ILinearMotorActuator> actuator = new();
+        Mock<ISteeringCommandReceiver> receiver = new();
         linearMotorQueryHandler.Setup(x => x.GetByIdAsync(4, cancellationToken))
-            .Returns(ValueTask.FromResult<LinearMotor?>(new LinearMotor
-            {
-                Id = 4,
-                SolarPanelId = 9,
-                MoveUpGpioPin = 17,
-                MoveDownGpioPin = 18,
-            }));
-        solarPanelQueryHandler.Setup(x => x.GetByIdAsync(9, cancellationToken))
-            .Returns(ValueTask.FromResult<SolarPanel?>(null));
+            .Returns(ValueTask.FromResult<LinearMotor?>(CreateLinearMotor()));
 
         LinearMotorMovementService service = new(
             linearMotorQueryHandler.Object,
-            solarPanelQueryHandler.Object,
-            installationSiteQueryHandler.Object,
-            actuator.Object,
+            receiver.Object,
             Mock.Of<ILogger<LinearMotorMovementService>>());
 
         // Act
         var result = await service.MoveUpAsync(4, 600, cancellationToken);
 
         // Assert
-        Assert.True(result.IsNotFound);
-        Assert.Equal("solar-panel-not-found", result.Error?.Code);
-        actuator.Verify(x => x.MoveUpAsync(It.IsAny<LinearMotor>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
+        Assert.True(result.IsSuccess);
+        receiver.Verify(x => x.MoveUpAsync(17, 18, cancellationToken), Times.Once);
+        receiver.Verify(x => x.StopAsync(17, 18, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
-    public async Task MoveDownAsync_ShouldReturnNotFound_WhenInstallationSiteDoesNotExist()
+    public async Task MoveDownAsync_ShouldSendMoveAndStopCommands_WhenLinearMotorExists()
     {
         // Arrange
         CancellationToken cancellationToken = new CancellationTokenSource().Token;
         Mock<ILinearMotorQueryHandler> linearMotorQueryHandler = new();
-        Mock<ISolarPanelQueryHandler> solarPanelQueryHandler = new();
-        Mock<IInstallationSiteQueryHandler> installationSiteQueryHandler = new();
-        Mock<ILinearMotorActuator> actuator = new();
+        Mock<ISteeringCommandReceiver> receiver = new();
         linearMotorQueryHandler.Setup(x => x.GetByIdAsync(4, cancellationToken))
             .Returns(ValueTask.FromResult<LinearMotor?>(CreateLinearMotor()));
-        solarPanelQueryHandler.Setup(x => x.GetByIdAsync(9, cancellationToken))
-            .Returns(ValueTask.FromResult<SolarPanel?>(new SolarPanel { Id = 9, InstallationSiteId = 12 }));
-        installationSiteQueryHandler.Setup(x => x.GetByIdAsync(12, cancellationToken))
-            .Returns(ValueTask.FromResult<InstallationSite?>(null));
 
         LinearMotorMovementService service = new(
             linearMotorQueryHandler.Object,
-            solarPanelQueryHandler.Object,
-            installationSiteQueryHandler.Object,
-            actuator.Object,
+            receiver.Object,
             Mock.Of<ILogger<LinearMotorMovementService>>());
 
         // Act
         var result = await service.MoveDownAsync(4, 600, cancellationToken);
 
         // Assert
-        Assert.True(result.IsNotFound);
-        Assert.Equal("installation-site-not-found", result.Error?.Code);
-        actuator.Verify(x => x.MoveDownAsync(It.IsAny<LinearMotor>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
+        Assert.True(result.IsSuccess);
+        receiver.Verify(x => x.MoveDownAsync(17, 18, cancellationToken), Times.Once);
+        receiver.Verify(x => x.StopAsync(17, 18, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
-    public async Task MoveUpAsync_ShouldBuildContextAndCallActuator_WhenAllDependenciesExist()
+    public async Task MoveUpAsync_ShouldStopEvenWhenDelayIsCanceled_WhenCancellationOccursDuringMovement()
     {
         // Arrange
-        CancellationToken cancellationToken = new CancellationTokenSource().Token;
+        using CancellationTokenSource cancellationTokenSource = new();
+        CancellationToken cancellationToken = cancellationTokenSource.Token;
         Mock<ILinearMotorQueryHandler> linearMotorQueryHandler = new();
-        Mock<ISolarPanelQueryHandler> solarPanelQueryHandler = new();
-        Mock<IInstallationSiteQueryHandler> installationSiteQueryHandler = new();
-        Mock<ILinearMotorActuator> actuator = new();
+        Mock<ISteeringCommandReceiver> receiver = new();
         linearMotorQueryHandler.Setup(x => x.GetByIdAsync(4, cancellationToken))
             .Returns(ValueTask.FromResult<LinearMotor?>(CreateLinearMotor()));
-        solarPanelQueryHandler.Setup(x => x.GetByIdAsync(9, cancellationToken))
-            .Returns(ValueTask.FromResult<SolarPanel?>(new SolarPanel { Id = 9, InstallationSiteId = 12 }));
-        installationSiteQueryHandler.Setup(x => x.GetByIdAsync(12, cancellationToken))
-            .Returns(ValueTask.FromResult<InstallationSite?>(new InstallationSite
-            {
-                Id = 12,
-                Latitude = 50.123m,
-                Longitude = 8.456m,
-                Name = "Main site",
-            }));
+        receiver.Setup(x => x.MoveUpAsync(17, 18, cancellationToken))
+            .Callback(() => cancellationTokenSource.Cancel())
+            .Returns(ValueTask.CompletedTask);
 
         LinearMotorMovementService service = new(
             linearMotorQueryHandler.Object,
-            solarPanelQueryHandler.Object,
-            installationSiteQueryHandler.Object,
-            actuator.Object,
+            receiver.Object,
             Mock.Of<ILogger<LinearMotorMovementService>>());
 
         // Act
-        var result = await service.MoveUpAsync(4, 650, cancellationToken);
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => service.MoveUpAsync(4, 650, cancellationToken).AsTask());
 
         // Assert
-        Assert.True(result.IsSuccess);
-        actuator.Verify(
-            x => x.MoveUpAsync(
-                It.Is<LinearMotor>(motor =>
-                    motor.Id == 4 &&
-                    motor.SolarPanelId == 9 &&
-                    motor.MoveUpGpioPin == 17 &&
-                    motor.MoveDownGpioPin == 18),
-                650,
-                cancellationToken),
-            Times.Once);
-    }
-
-    [Fact]
-    public async Task MoveDownAsync_ShouldBuildContextAndCallActuator_WhenAllDependenciesExist()
-    {
-        // Arrange
-        CancellationToken cancellationToken = new CancellationTokenSource().Token;
-        Mock<ILinearMotorQueryHandler> linearMotorQueryHandler = new();
-        Mock<ISolarPanelQueryHandler> solarPanelQueryHandler = new();
-        Mock<IInstallationSiteQueryHandler> installationSiteQueryHandler = new();
-        Mock<ILinearMotorActuator> actuator = new();
-        linearMotorQueryHandler.Setup(x => x.GetByIdAsync(4, cancellationToken))
-            .Returns(ValueTask.FromResult<LinearMotor?>(CreateLinearMotor()));
-        solarPanelQueryHandler.Setup(x => x.GetByIdAsync(9, cancellationToken))
-            .Returns(ValueTask.FromResult<SolarPanel?>(new SolarPanel { Id = 9, InstallationSiteId = 12 }));
-        installationSiteQueryHandler.Setup(x => x.GetByIdAsync(12, cancellationToken))
-            .Returns(ValueTask.FromResult<InstallationSite?>(new InstallationSite
-            {
-                Id = 12,
-                Latitude = 50.123m,
-                Longitude = 8.456m,
-                Name = "Main site",
-            }));
-
-        LinearMotorMovementService service = new(
-            linearMotorQueryHandler.Object,
-            solarPanelQueryHandler.Object,
-            installationSiteQueryHandler.Object,
-            actuator.Object,
-            Mock.Of<ILogger<LinearMotorMovementService>>());
-
-        // Act
-        var result = await service.MoveDownAsync(4, 700, cancellationToken);
-
-        // Assert
-        Assert.True(result.IsSuccess);
-        actuator.Verify(
-            x => x.MoveDownAsync(
-                It.Is<LinearMotor>(motor =>
-                    motor.Id == 4 &&
-                    motor.SolarPanelId == 9 &&
-                    motor.MoveUpGpioPin == 17 &&
-                    motor.MoveDownGpioPin == 18),
-                700,
-                cancellationToken),
-            Times.Once);
+        receiver.Verify(x => x.MoveUpAsync(17, 18, cancellationToken), Times.Once);
+        receiver.Verify(x => x.StopAsync(17, 18, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     private static LinearMotor CreateLinearMotor() =>

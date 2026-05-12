@@ -5,7 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 using SolarTracker.Domain.Abstractions;
 using SolarTracker.IoC.Configuration;
 using SolarTracker.Application.Interfaces.Calculators;
-using SolarTracker.Application.Interfaces.Hardware;
 using SolarTracker.Application.Interfaces.QueryHandlers;
 using SolarTracker.Application.Interfaces.Repositories;
 using SolarTracker.Infrastructure.Calculators;
@@ -62,12 +61,12 @@ public static class DependencyInjection
 
         if (useFakeGpio)
         {
-            services.AddSingleton<ILinearMotorActuator, FakeLinearMotorActuator>();
+            services.AddSingleton<ISteeringCommandReceiver, FakeLinearMotorActuator>();
             services.AddSingleton<ITiltMeasuringUnitPositionReader, FakeTiltMeasuringUnitPositionReader>();
         }
         else
         {
-            services.AddSingleton<ILinearMotorActuator, RaspberryPiLinearMotorActuator>();
+            services.AddSingleton<ISteeringCommandReceiver, RaspberryPiLinearMotorActuator>();
             services.AddSingleton<ITiltMeasuringUnitPositionReader, RaspberryPiTiltMeasuringUnitPositionReader>();
         }
 

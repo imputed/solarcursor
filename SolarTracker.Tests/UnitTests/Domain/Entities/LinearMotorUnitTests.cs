@@ -1,3 +1,5 @@
+using Moq;
+using SolarTracker.Domain.Abstractions;
 using SolarTracker.Domain.Entities;
 
 namespace SolarTracker.Tests.UnitTests.Domain.Entities;
@@ -5,7 +7,7 @@ namespace SolarTracker.Tests.UnitTests.Domain.Entities;
 public sealed class LinearMotorUnitTests
 {
     [Fact]
-    public async Task MoveUpAsync_ShouldPassTheLinearMotorAndDurationToTheAction_WhenInvoked()
+    public async Task MoveUpAsync_ShouldPassPinsToReceiver_WhenInvoked()
     {
         // Arrange
         CancellationToken cancellationToken = new CancellationTokenSource().Token;
@@ -16,29 +18,17 @@ public sealed class LinearMotorUnitTests
             MoveUpGpioPin = 17,
             MoveDownGpioPin = 18,
         };
-        LinearMotor? passedMotor = null;
-        int passedDurationMs = 0;
-        CancellationToken passedCancellationToken = default;
-
-        ValueTask Action(LinearMotor motor, int durationMs, CancellationToken token)
-        {
-            passedMotor = motor;
-            passedDurationMs = durationMs;
-            passedCancellationToken = token;
-            return ValueTask.CompletedTask;
-        }
+        Mock<ISteeringCommandReceiver> receiver = new();
 
         // Act
-        await linearMotor.MoveUpAsync(Action, 900, cancellationToken);
+        await linearMotor.MoveUpAsync(receiver.Object, cancellationToken);
 
         // Assert
-        Assert.Same(linearMotor, passedMotor);
-        Assert.Equal(900, passedDurationMs);
-        Assert.Equal(cancellationToken, passedCancellationToken);
+        receiver.Verify(x => x.MoveUpAsync(17, 18, cancellationToken), Times.Once);
     }
 
     [Fact]
-    public async Task MoveDownAsync_ShouldPassTheLinearMotorAndDurationToTheAction_WhenInvoked()
+    public async Task MoveDownAsync_ShouldPassPinsToReceiver_WhenInvoked()
     {
         // Arrange
         CancellationToken cancellationToken = new CancellationTokenSource().Token;
@@ -49,24 +39,33 @@ public sealed class LinearMotorUnitTests
             MoveUpGpioPin = 17,
             MoveDownGpioPin = 18,
         };
-        LinearMotor? passedMotor = null;
-        int passedDurationMs = 0;
-        CancellationToken passedCancellationToken = default;
-
-        ValueTask Action(LinearMotor motor, int durationMs, CancellationToken token)
-        {
-            passedMotor = motor;
-            passedDurationMs = durationMs;
-            passedCancellationToken = token;
-            return ValueTask.CompletedTask;
-        }
+        Mock<ISteeringCommandReceiver> receiver = new();
 
         // Act
-        await linearMotor.MoveDownAsync(Action, 900, cancellationToken);
+        await linearMotor.MoveDownAsync(receiver.Object, cancellationToken);
 
         // Assert
-        Assert.Same(linearMotor, passedMotor);
-        Assert.Equal(900, passedDurationMs);
-        Assert.Equal(cancellationToken, passedCancellationToken);
+        receiver.Verify(x => x.MoveDownAsync(17, 18, cancellationToken), Times.Once);
+    }
+
+    [Fact]
+    public async Task StopAsync_ShouldPassPinsToReceiver_WhenInvoked()
+    {
+        // Arrange
+        CancellationToken cancellationToken = new CancellationTokenSource().Token;
+        LinearMotor linearMotor = new()
+        {
+            Id = 7,
+            SolarPanelId = 20,
+            MoveUpGpioPin = 17,
+            MoveDownGpioPin = 18,
+        };
+        Mock<ISteeringCommandReceiver> receiver = new();
+
+        // Act
+        await linearMotor.StopAsync(receiver.Object, cancellationToken);
+
+        // Assert
+        receiver.Verify(x => x.StopAsync(17, 18, cancellationToken), Times.Once);
     }
 }

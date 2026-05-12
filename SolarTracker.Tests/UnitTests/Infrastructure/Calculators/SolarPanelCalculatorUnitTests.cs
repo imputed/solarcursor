@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using Moq;
-using SolarTracker.Application.Interfaces.Hardware;
 using SolarTracker.Application.Interfaces.QueryHandlers;
 using SolarTracker.Application.Interfaces.Repositories;
 using SolarTracker.Domain.Abstractions;
@@ -41,7 +40,7 @@ public sealed class SolarPanelCalculatorUnitTests
         Mock<ILinearMotorQueryHandler> linearMotorQueryHandler = new();
         Mock<ISolarTrackingConfigurationRepository> configurationRepository = new();
         Mock<ITiltMeasuringUnitPositionReader> tiltMeasuringUnitPositionReader = new();
-        Mock<ILinearMotorActuator> actuator = new();
+        Mock<ISteeringCommandReceiver> receiver = new();
         Mock<ILogger<SolarPanelCalculator>> logger = new();
 
         solarPanelQueryHandler.Setup(x => x.GetByIdAsync(10, cancellationToken))
@@ -57,16 +56,16 @@ public sealed class SolarPanelCalculatorUnitTests
             .Returns(ValueTask.FromResult<LinearMotor?>(motor1));
         linearMotorQueryHandler.Setup(x => x.GetByIdAsync(2, cancellationToken))
             .Returns(ValueTask.FromResult<LinearMotor?>(null));
-        actuator.Setup(x => x.MoveUpAsync(It.IsAny<LinearMotor>(), It.IsAny<int>(), cancellationToken))
+        receiver.Setup(x => x.MoveUpAsync(It.IsAny<int>(), It.IsAny<int>(), cancellationToken))
             .Returns(ValueTask.CompletedTask);
-        actuator.Setup(x => x.MoveDownAsync(It.IsAny<LinearMotor>(), It.IsAny<int>(), cancellationToken))
+        receiver.Setup(x => x.MoveDownAsync(It.IsAny<int>(), It.IsAny<int>(), cancellationToken))
+            .Returns(ValueTask.CompletedTask);
+        receiver.Setup(x => x.StopAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .Returns(ValueTask.CompletedTask);
 
         LinearMotorMovementService movementService = new(
             linearMotorQueryHandler.Object,
-            solarPanelQueryHandler.Object,
-            installationSiteQueryHandler.Object,
-            actuator.Object,
+            receiver.Object,
             Mock.Of<ILogger<LinearMotorMovementService>>());
         SolarPanelCalculator calculator = new(
             solarPanelQueryHandler.Object,
@@ -84,14 +83,17 @@ public sealed class SolarPanelCalculatorUnitTests
         Assert.False(result.IsSuccess);
         Assert.False(result.IsNotFound);
         Assert.Equal("solar-panel-movement-step-reverted", result.Error?.Code);
-        actuator.Verify(
-            x => x.MoveUpAsync(It.Is<LinearMotor>(motor => motor.Id == 1), 100, cancellationToken),
+        receiver.Verify(
+            x => x.MoveUpAsync(17, 18, cancellationToken),
             Times.Once);
-        actuator.Verify(
-            x => x.MoveDownAsync(It.Is<LinearMotor>(motor => motor.Id == 1), 100, cancellationToken),
+        receiver.Verify(
+            x => x.StopAsync(17, 18, It.IsAny<CancellationToken>()),
+            Times.Exactly(2));
+        receiver.Verify(
+            x => x.MoveDownAsync(17, 18, cancellationToken),
             Times.Once);
-        actuator.Verify(
-            x => x.MoveUpAsync(It.Is<LinearMotor>(motor => motor.Id == 2), 100, cancellationToken),
+        receiver.Verify(
+            x => x.MoveUpAsync(19, 20, cancellationToken),
             Times.Never);
     }
 
@@ -123,7 +125,7 @@ public sealed class SolarPanelCalculatorUnitTests
         Mock<ILinearMotorQueryHandler> linearMotorQueryHandler = new();
         Mock<ISolarTrackingConfigurationRepository> configurationRepository = new();
         Mock<ITiltMeasuringUnitPositionReader> tiltMeasuringUnitPositionReader = new();
-        Mock<ILinearMotorActuator> actuator = new();
+        Mock<ISteeringCommandReceiver> receiver = new();
         Mock<ILogger<SolarPanelCalculator>> logger = new();
 
         solarPanelQueryHandler.Setup(x => x.GetByIdAsync(10, cancellationToken))
@@ -139,14 +141,14 @@ public sealed class SolarPanelCalculatorUnitTests
             .Returns(ValueTask.FromResult<LinearMotor?>(null));
         linearMotorQueryHandler.Setup(x => x.GetByIdAsync(2, cancellationToken))
             .Returns(ValueTask.FromResult<LinearMotor?>(null));
-        actuator.Setup(x => x.MoveUpAsync(It.IsAny<LinearMotor>(), It.IsAny<int>(), cancellationToken))
+        receiver.Setup(x => x.MoveUpAsync(It.IsAny<int>(), It.IsAny<int>(), cancellationToken))
+            .Returns(ValueTask.CompletedTask);
+        receiver.Setup(x => x.StopAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .Returns(ValueTask.CompletedTask);
 
         LinearMotorMovementService movementService = new(
             linearMotorQueryHandler.Object,
-            solarPanelQueryHandler.Object,
-            installationSiteQueryHandler.Object,
-            actuator.Object,
+            receiver.Object,
             Mock.Of<ILogger<LinearMotorMovementService>>());
         SolarPanelCalculator calculator = new(
             solarPanelQueryHandler.Object,
@@ -163,11 +165,14 @@ public sealed class SolarPanelCalculatorUnitTests
         // Assert
         Assert.False(result.IsSuccess);
         Assert.Equal("solar-panel-movement-recovery-failed", result.Error?.Code);
-        actuator.Verify(
-            x => x.MoveUpAsync(It.Is<LinearMotor>(motor => motor.Id == 1), 100, cancellationToken),
+        receiver.Verify(
+            x => x.MoveUpAsync(17, 18, cancellationToken),
             Times.Once);
-        actuator.Verify(
-            x => x.MoveDownAsync(It.IsAny<LinearMotor>(), It.IsAny<int>(), cancellationToken),
+        receiver.Verify(
+            x => x.StopAsync(17, 18, It.IsAny<CancellationToken>()),
+            Times.Once);
+        receiver.Verify(
+            x => x.MoveDownAsync(It.IsAny<int>(), It.IsAny<int>(), cancellationToken),
             Times.Never);
     }
 
