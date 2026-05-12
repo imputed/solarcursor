@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using Moq;
-using SolarTracker.Application.Interfaces.Hardware;
 using SolarTracker.Application.Interfaces.QueryHandlers;
 using SolarTracker.Application.Interfaces.Repositories;
 using SolarTracker.Domain.Abstractions;

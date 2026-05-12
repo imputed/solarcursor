@@ -1,4 +1,6 @@
-namespace SolarTracker.Application.Interfaces.Hardware;
+using SolarTracker.Domain.ValueObjects;
+
+namespace SolarTracker.Domain.Abstractions;
 
 public interface ILinearMotorActuator
 {

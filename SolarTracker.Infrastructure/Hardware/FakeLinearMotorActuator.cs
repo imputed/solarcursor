@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
-using SolarTracker.Application.Interfaces.Hardware;
+using SolarTracker.Domain.Abstractions;
+using SolarTracker.Domain.ValueObjects;
 using SolarTracker.Infrastructure.Logging;
 
 namespace SolarTracker.Infrastructure.Hardware;

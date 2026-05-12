@@ -1,8 +1,9 @@
 using Microsoft.Extensions.Logging;
 using Moq;
-using SolarTracker.Application.Interfaces.Hardware;
 using SolarTracker.Application.Interfaces.QueryHandlers;
+using SolarTracker.Domain.Abstractions;
 using SolarTracker.Domain.Entities;
+using SolarTracker.Domain.ValueObjects;
 using SolarTracker.Infrastructure.Services;
 
 namespace SolarTracker.Tests.UnitTests.Infrastructure.Services;

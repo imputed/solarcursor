@@ -1,4 +1,4 @@
-namespace SolarTracker.Application.Interfaces.Hardware;
+namespace SolarTracker.Domain.ValueObjects;
 
 public sealed record LinearMotorMovementContext(
     int LinearMotorId,
