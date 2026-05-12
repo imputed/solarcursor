@@ -40,9 +40,7 @@ public sealed class CurrentMeasuringUnitAnalyzeRequestValidator : AbstractValida
         LeafCounter leafCounter)
     {
         if (node is null)
-        {
             return;
-        }
 
         if (depth > MaxDepth)
         {

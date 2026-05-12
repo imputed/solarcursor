@@ -21,9 +21,7 @@ public sealed class TiltMeasuringUnitRepository(SolarTrackerDbContext dbContext)
     {
         var row = await dbContext.TiltMeasuringUnits.FindAsync([entity.Id], cancellationToken);
         if (row is null)
-        {
             return;
-        }
 
         TiltMeasuringUnitPersistenceMapping.CopyScalars(row, entity);
         await dbContext.SaveChangesAsync(cancellationToken);

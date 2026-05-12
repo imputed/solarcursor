@@ -32,3 +32,5 @@ app.UseHttpsRedirection();
 app.MapSolarTrackerApiEndpoints();
 
 app.Run();
+
+public partial class Program;

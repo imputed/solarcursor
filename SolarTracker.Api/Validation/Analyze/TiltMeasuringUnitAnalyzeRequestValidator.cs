@@ -40,9 +40,7 @@ public sealed class TiltMeasuringUnitAnalyzeRequestValidator : AbstractValidator
         LeafCounter leafCounter)
     {
         if (node is null)
-        {
             return;
-        }
 
         if (depth > MaxDepth)
         {

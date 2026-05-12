@@ -29,5 +29,6 @@ alwaysApply: false
 - Prefer `readonly struct` or `readonly record struct` for tiny value-like types (roughly up to 16 bytes) when the type has value semantics and framework behavior is not put at risk.
 - Do not force struct conversion for EF entities, API request models, polymorphic hierarchies, shared mutable helpers, or types where `default` struct semantics would change behavior.
 - Prefer short guard clauses and single-line `if` statements without braces when the body is a single short statement and readability stays clear.
+- Write single-line `if` statements in the compact form without braces, for example `if (!validation.IsValid) return validation.ToValidationProblem();`.
 - Keep braces for multi-line control flow or when omitting them would reduce clarity.
 - Do not use nullable return values for expected control flow such as success, not found, or business-rule failures; prefer an explicit `Result` pattern.

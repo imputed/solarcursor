@@ -9,10 +9,6 @@ internal static class TiltMeasuringUnitEndpoints
         RouteGroupBuilder group = app.MapGroup("/api/tilt-measuring-units")
             .WithTags("TiltMeasuringUnits");
 
-        group.MapGet("/", TiltMeasuringUnitHandlers.GetCollectionAsync)
-            .WithName("GetTiltMeasuringUnits")
-            .Produces<IReadOnlyList<TiltMeasuringUnitDto>>(StatusCodes.Status200OK);
-
         group.MapPost("/analyze", TiltMeasuringUnitHandlers.AnalyzeAsync)
             .WithName("AnalyzeTiltMeasuringUnits")
             .Produces<IReadOnlyList<TiltMeasuringUnitDto>>(StatusCodes.Status200OK)

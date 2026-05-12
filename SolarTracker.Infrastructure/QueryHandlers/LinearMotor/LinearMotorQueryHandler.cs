@@ -29,9 +29,7 @@ public sealed class LinearMotorQueryHandler(SolarTrackerDbContext dbContext) : I
 
         List<LinearMotorDb> rows = await queryable.ToListAsync(cancellationToken);
         if (rows.Count == 0)
-        {
             return [];
-        }
 
         List<LinearMotorEntity> entities = new(rows.Count);
         foreach (var row in rows)

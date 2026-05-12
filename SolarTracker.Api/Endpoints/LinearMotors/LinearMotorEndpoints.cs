@@ -9,10 +9,6 @@ internal static class LinearMotorEndpoints
         RouteGroupBuilder group = app.MapGroup("/api/linear-motors")
             .WithTags("LinearMotors");
 
-        group.MapGet("/", LinearMotorHandlers.GetCollectionAsync)
-            .WithName("GetLinearMotors")
-            .Produces<IReadOnlyList<LinearMotorDto>>(StatusCodes.Status200OK);
-
         group.MapPost("/analyze", LinearMotorHandlers.AnalyzeAsync)
             .WithName("AnalyzeLinearMotors")
             .Produces<IReadOnlyList<LinearMotorDto>>(StatusCodes.Status200OK)

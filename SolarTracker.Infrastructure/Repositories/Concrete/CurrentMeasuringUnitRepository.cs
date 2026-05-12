@@ -21,9 +21,7 @@ public sealed class CurrentMeasuringUnitRepository(SolarTrackerDbContext dbConte
     {
         var row = await dbContext.CurrentMeasuringUnits.FindAsync([entity.Id], cancellationToken);
         if (row is null)
-        {
             return;
-        }
 
         CurrentMeasuringUnitPersistenceMapping.CopyScalars(row, entity);
         await dbContext.SaveChangesAsync(cancellationToken);

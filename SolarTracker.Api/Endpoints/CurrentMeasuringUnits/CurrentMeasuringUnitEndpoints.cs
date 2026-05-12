@@ -9,10 +9,6 @@ internal static class CurrentMeasuringUnitEndpoints
         RouteGroupBuilder group = app.MapGroup("/api/current-measuring-units")
             .WithTags("CurrentMeasuringUnits");
 
-        group.MapGet("/", CurrentMeasuringUnitHandlers.GetCollectionAsync)
-            .WithName("GetCurrentMeasuringUnits")
-            .Produces<IReadOnlyList<CurrentMeasuringUnitDto>>(StatusCodes.Status200OK);
-
         group.MapPost("/analyze", CurrentMeasuringUnitHandlers.AnalyzeAsync)
             .WithName("AnalyzeCurrentMeasuringUnits")
             .Produces<IReadOnlyList<CurrentMeasuringUnitDto>>(StatusCodes.Status200OK)

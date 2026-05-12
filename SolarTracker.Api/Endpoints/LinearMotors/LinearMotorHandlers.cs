@@ -12,15 +12,6 @@ namespace SolarTracker.Api.Endpoints.LinearMotors;
 
 internal static class LinearMotorHandlers
 {
-    internal static async Task<Ok<IReadOnlyList<LinearMotorDto>>> GetCollectionAsync(
-        ILinearMotorQueryHandler queryHandler,
-        CancellationToken cancellationToken)
-    {
-        IReadOnlyList<LinearMotor> entities = await queryHandler.AnalyzeAsync(CreateDefaultAnalyzeRequest(), cancellationToken);
-        IReadOnlyList<LinearMotorDto> dtos = entities.Select(LinearMotorMapping.ToDto).ToList();
-        return TypedResults.Ok(dtos);
-    }
-
     internal static async Task<Results<Ok<IReadOnlyList<LinearMotorDto>>, ValidationProblem>> AnalyzeAsync(
         LinearMotorAnalyzeRequest body,
         IValidator<LinearMotorAnalyzeRequest> validator,
@@ -29,9 +20,7 @@ internal static class LinearMotorHandlers
     {
         FluentValidation.Results.ValidationResult validation = await validator.ValidateAsync(body, cancellationToken);
         if (!validation.IsValid)
-        {
             return validation.ToValidationProblem();
-        }
 
         IReadOnlyList<LinearMotor> entities = await queryHandler.AnalyzeAsync(body, cancellationToken);
         IReadOnlyList<LinearMotorDto> dtos = entities.Select(LinearMotorMapping.ToDto).ToList();
@@ -56,9 +45,7 @@ internal static class LinearMotorHandlers
     {
         FluentValidation.Results.ValidationResult validation = await validator.ValidateAsync(dto, cancellationToken);
         if (!validation.IsValid)
-        {
             return validation.ToValidationProblem();
-        }
 
         int newId = await service.AddAsync(dto, cancellationToken);
         LinearMotor? created = await queryHandler.GetByIdAsync(newId, cancellationToken);
@@ -85,14 +72,10 @@ internal static class LinearMotorHandlers
 
         FluentValidation.Results.ValidationResult validation = await validator.ValidateAsync(dto, cancellationToken);
         if (!validation.IsValid)
-        {
             return validation.ToValidationProblem();
-        }
 
         if (await queryHandler.GetByIdAsync(id, cancellationToken) is null)
-        {
             return TypedResults.NotFound();
-        }
 
         await service.UpdateAsync(dto, cancellationToken);
         return TypedResults.NoContent();
@@ -105,14 +88,9 @@ internal static class LinearMotorHandlers
         CancellationToken cancellationToken)
     {
         if (await queryHandler.GetByIdAsync(id, cancellationToken) is null)
-        {
             return TypedResults.NotFound();
-        }
 
         await service.DeleteAsync(id, cancellationToken);
         return TypedResults.NoContent();
     }
-
-    private static LinearMotorAnalyzeRequest CreateDefaultAnalyzeRequest() =>
-        new(Filter: null, SortBy: null);
 }

@@ -39,9 +39,7 @@ public sealed class SolarPanelAnalyzeRequestValidator : AbstractValidator<SolarP
         LeafCounter leafCounter)
     {
         if (node is null)
-        {
             return;
-        }
 
         if (depth > MaxDepth)
         {

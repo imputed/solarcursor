@@ -40,9 +40,7 @@ public sealed class LinearMotorAnalyzeRequestValidator : AbstractValidator<Linea
         LeafCounter leafCounter)
     {
         if (node is null)
-        {
             return;
-        }
 
         if (depth > MaxDepth)
         {

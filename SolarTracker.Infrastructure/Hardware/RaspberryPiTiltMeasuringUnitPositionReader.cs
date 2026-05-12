@@ -41,9 +41,7 @@ public sealed class RaspberryPiTiltMeasuringUnitPositionReader(
     private static void OpenInputPin(GpioController controller, int pinNumber)
     {
         if (!controller.IsPinOpen(pinNumber))
-        {
             controller.OpenPin(pinNumber, PinMode.Input);
-        }
     }
 
     private static async ValueTask<double> ReadDutyCycleAsync(
@@ -63,9 +61,7 @@ public sealed class RaspberryPiTiltMeasuringUnitPositionReader(
 
         double periodMs = highStopwatch.Elapsed.TotalMilliseconds + lowStopwatch.Elapsed.TotalMilliseconds;
         if (periodMs <= 0d)
-        {
             throw new InvalidOperationException("PWM period must be greater than zero.");
-        }
 
         return highStopwatch.Elapsed.TotalMilliseconds / periodMs;
     }
@@ -81,9 +77,7 @@ public sealed class RaspberryPiTiltMeasuringUnitPositionReader(
         void Handler(object sender, PinValueChangedEventArgs args)
         {
             if ((args.ChangeType & edge) != 0)
-            {
                 taskCompletionSource.TrySetResult();
-            }
         }
 
         controller.RegisterCallbackForPinValueChangedEvent(pinNumber, edge, Handler);

@@ -36,9 +36,7 @@ public sealed class InstallationSiteQueryHandler(SolarTrackerDbContext dbContext
 
         List<InstallationSiteDb> rows = await queryable.ToListAsync(cancellationToken);
         if (rows.Count == 0)
-        {
             return [];
-        }
 
         List<InstallationSiteEntity> entities = new(rows.Count);
         foreach (var row in rows)

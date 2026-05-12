@@ -7,9 +7,7 @@ internal static class Aggregators
     internal static Expression CombineAll(IReadOnlyList<Expression> operands)
     {
         if (operands.Count == 0)
-        {
             return Expression.Constant(true);
-        }
 
         Expression aggregate = operands[0];
         for (int i = 1; i < operands.Count; i++)
@@ -23,9 +21,7 @@ internal static class Aggregators
     internal static Expression CombineAny(IReadOnlyList<Expression> operands)
     {
         if (operands.Count == 0)
-        {
             return Expression.Constant(false);
-        }
 
         Expression aggregate = operands[0];
         for (int i = 1; i < operands.Count; i++)

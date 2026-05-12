@@ -40,9 +40,7 @@ public sealed class InstallationSiteAnalyzeRequestValidator : AbstractValidator<
         LeafCounter leafCounter)
     {
         if (node is null)
-        {
             return;
-        }
 
         if (depth > MaxDepth)
         {

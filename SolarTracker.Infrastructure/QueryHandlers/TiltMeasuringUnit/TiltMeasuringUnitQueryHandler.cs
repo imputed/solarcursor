@@ -29,9 +29,7 @@ public sealed class TiltMeasuringUnitQueryHandler(SolarTrackerDbContext dbContex
 
         List<TiltMeasuringUnitDb> rows = await queryable.ToListAsync(cancellationToken);
         if (rows.Count == 0)
-        {
             return [];
-        }
 
         List<TiltMeasuringUnitEntity> entities = new(rows.Count);
         foreach (var row in rows)

@@ -21,9 +21,7 @@ public sealed class SolarPanelRepository(SolarTrackerDbContext dbContext) : ISol
     {
         var row = await dbContext.SolarPanels.FindAsync([entity.Id], cancellationToken);
         if (row is null)
-        {
             return;
-        }
 
         SolarPanelPersistenceMapping.CopyScalars(row, entity);
         await dbContext.SaveChangesAsync(cancellationToken);

@@ -9,10 +9,6 @@ internal static class InstallationSiteEndpoints
         RouteGroupBuilder group = app.MapGroup("/api/installation-sites")
             .WithTags("InstallationSites");
 
-        group.MapGet("/", InstallationSiteHandlers.GetCollectionAsync)
-            .WithName("GetInstallationSites")
-            .Produces<IReadOnlyList<InstallationSiteDto>>(StatusCodes.Status200OK);
-
         group.MapPost("/analyze", InstallationSiteHandlers.AnalyzeAsync)
             .WithName("AnalyzeInstallationSites")
             .Produces<IReadOnlyList<InstallationSiteDto>>(StatusCodes.Status200OK)

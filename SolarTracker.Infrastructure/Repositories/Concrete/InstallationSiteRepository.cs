@@ -21,9 +21,7 @@ public sealed class InstallationSiteRepository(SolarTrackerDbContext dbContext) 
     {
         var row = await dbContext.InstallationSites.FindAsync([entity.Id], cancellationToken);
         if (row is null)
-        {
             return;
-        }
 
         InstallationSitePersistenceMapping.CopyScalars(row, entity);
         await dbContext.SaveChangesAsync(cancellationToken);

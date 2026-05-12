@@ -12,15 +12,6 @@ namespace SolarTracker.Api.Endpoints.TiltMeasuringUnits;
 
 internal static class TiltMeasuringUnitHandlers
 {
-    internal static async Task<Ok<IReadOnlyList<TiltMeasuringUnitDto>>> GetCollectionAsync(
-        ITiltMeasuringUnitQueryHandler queryHandler,
-        CancellationToken cancellationToken)
-    {
-        IReadOnlyList<TiltMeasuringUnit> entities = await queryHandler.AnalyzeAsync(CreateDefaultAnalyzeRequest(), cancellationToken);
-        IReadOnlyList<TiltMeasuringUnitDto> dtos = entities.Select(TiltMeasuringUnitMapping.ToDto).ToList();
-        return TypedResults.Ok(dtos);
-    }
-
     internal static async Task<Results<Ok<IReadOnlyList<TiltMeasuringUnitDto>>, ValidationProblem>> AnalyzeAsync(
         TiltMeasuringUnitAnalyzeRequest body,
         IValidator<TiltMeasuringUnitAnalyzeRequest> validator,
@@ -29,9 +20,7 @@ internal static class TiltMeasuringUnitHandlers
     {
         FluentValidation.Results.ValidationResult validation = await validator.ValidateAsync(body, cancellationToken);
         if (!validation.IsValid)
-        {
             return validation.ToValidationProblem();
-        }
 
         IReadOnlyList<TiltMeasuringUnit> entities = await queryHandler.AnalyzeAsync(body, cancellationToken);
         IReadOnlyList<TiltMeasuringUnitDto> dtos = entities.Select(TiltMeasuringUnitMapping.ToDto).ToList();
@@ -56,9 +45,7 @@ internal static class TiltMeasuringUnitHandlers
     {
         FluentValidation.Results.ValidationResult validation = await validator.ValidateAsync(dto, cancellationToken);
         if (!validation.IsValid)
-        {
             return validation.ToValidationProblem();
-        }
 
         int newId = await service.AddAsync(dto, cancellationToken);
         TiltMeasuringUnit? created = await queryHandler.GetByIdAsync(newId, cancellationToken);
@@ -85,14 +72,10 @@ internal static class TiltMeasuringUnitHandlers
 
         FluentValidation.Results.ValidationResult validation = await validator.ValidateAsync(dto, cancellationToken);
         if (!validation.IsValid)
-        {
             return validation.ToValidationProblem();
-        }
 
         if (await queryHandler.GetByIdAsync(id, cancellationToken) is null)
-        {
             return TypedResults.NotFound();
-        }
 
         await service.UpdateAsync(dto, cancellationToken);
         return TypedResults.NoContent();
@@ -105,14 +88,8 @@ internal static class TiltMeasuringUnitHandlers
         CancellationToken cancellationToken)
     {
         if (await queryHandler.GetByIdAsync(id, cancellationToken) is null)
-        {
             return TypedResults.NotFound();
-        }
-
         await service.DeleteAsync(id, cancellationToken);
         return TypedResults.NoContent();
     }
-
-    private static TiltMeasuringUnitAnalyzeRequest CreateDefaultAnalyzeRequest() =>
-        new(Filter: null, SortBy: null);
 }

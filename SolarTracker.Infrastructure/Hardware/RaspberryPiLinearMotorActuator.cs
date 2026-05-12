@@ -51,8 +51,6 @@ public sealed class RaspberryPiLinearMotorActuator(ILogger<RaspberryPiLinearMoto
     private static void OpenOutputPin(GpioController controller, int pinNumber)
     {
         if (!controller.IsPinOpen(pinNumber))
-        {
             controller.OpenPin(pinNumber, PinMode.Output);
-        }
     }
 }

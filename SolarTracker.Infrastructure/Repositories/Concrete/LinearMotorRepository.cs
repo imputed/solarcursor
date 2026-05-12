@@ -21,9 +21,7 @@ public sealed class LinearMotorRepository(SolarTrackerDbContext dbContext) : ILi
     {
         var row = await dbContext.LinearMotors.FindAsync([entity.Id], cancellationToken);
         if (row is null)
-        {
             return;
-        }
 
         LinearMotorPersistenceMapping.CopyScalars(row, entity);
         await dbContext.SaveChangesAsync(cancellationToken);

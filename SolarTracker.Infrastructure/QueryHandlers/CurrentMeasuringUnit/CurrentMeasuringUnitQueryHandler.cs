@@ -29,9 +29,7 @@ public sealed class CurrentMeasuringUnitQueryHandler(SolarTrackerDbContext dbCon
 
         List<CurrentMeasuringUnitDb> rows = await queryable.ToListAsync(cancellationToken);
         if (rows.Count == 0)
-        {
             return [];
-        }
 
         List<CurrentMeasuringUnitEntity> entities = new(rows.Count);
         foreach (var row in rows)

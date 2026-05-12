@@ -13,15 +13,6 @@ namespace SolarTracker.Api.Endpoints.SolarPanels;
 
 internal static class SolarPanelHandlers
 {
-    internal static async Task<Ok<IReadOnlyList<SolarPanelDto>>> GetCollectionAsync(
-        ISolarPanelQueryHandler queryHandler,
-        CancellationToken cancellationToken)
-    {
-        IReadOnlyList<SolarPanel> entities = await queryHandler.AnalyzeAsync(CreateDefaultAnalyzeRequest(), cancellationToken);
-        IReadOnlyList<SolarPanelDto> dtos = entities.Select(SolarPanelMapping.ToDto).ToList();
-        return TypedResults.Ok(dtos);
-    }
-
     internal static async Task<Results<Ok<IReadOnlyList<SolarPanelDto>>, ValidationProblem>> AnalyzeAsync(
         SolarPanelAnalyzeRequest body,
         IValidator<SolarPanelAnalyzeRequest> validator,
@@ -30,9 +21,7 @@ internal static class SolarPanelHandlers
     {
         FluentValidation.Results.ValidationResult validation = await validator.ValidateAsync(body, cancellationToken);
         if (!validation.IsValid)
-        {
             return validation.ToValidationProblem();
-        }
 
         IReadOnlyList<SolarPanel> entities = await queryHandler.AnalyzeAsync(body, cancellationToken);
         IReadOnlyList<SolarPanelDto> dtos = entities.Select(SolarPanelMapping.ToDto).ToList();
@@ -84,9 +73,7 @@ internal static class SolarPanelHandlers
     {
         FluentValidation.Results.ValidationResult validation = await validator.ValidateAsync(dto, cancellationToken);
         if (!validation.IsValid)
-        {
             return validation.ToValidationProblem();
-        }
 
         int newId = await service.AddAsync(dto, cancellationToken);
         SolarPanel? created = await queryHandler.GetByIdAsync(newId, cancellationToken);
@@ -113,14 +100,10 @@ internal static class SolarPanelHandlers
 
         FluentValidation.Results.ValidationResult validation = await validator.ValidateAsync(dto, cancellationToken);
         if (!validation.IsValid)
-        {
             return validation.ToValidationProblem();
-        }
 
         if (await queryHandler.GetByIdAsync(id, cancellationToken) is null)
-        {
             return TypedResults.NotFound();
-        }
 
         await service.UpdateAsync(dto, cancellationToken);
         return TypedResults.NoContent();
@@ -133,14 +116,9 @@ internal static class SolarPanelHandlers
         CancellationToken cancellationToken)
     {
         if (await queryHandler.GetByIdAsync(id, cancellationToken) is null)
-        {
             return TypedResults.NotFound();
-        }
 
         await service.DeleteAsync(id, cancellationToken);
         return TypedResults.NoContent();
     }
-
-    private static SolarPanelAnalyzeRequest CreateDefaultAnalyzeRequest() =>
-        new(Filter: null, SortBy: null);
 }

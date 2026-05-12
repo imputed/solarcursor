@@ -33,9 +33,7 @@ public sealed class SolarPanelQueryHandler(SolarTrackerDbContext dbContext) : IS
 
         List<SolarPanelDb> rows = await queryable.ToListAsync(cancellationToken);
         if (rows.Count == 0)
-        {
             return [];
-        }
 
         List<SolarPanelEntity> entities = new(rows.Count);
         foreach (var row in rows)

@@ -12,15 +12,6 @@ namespace SolarTracker.Api.Endpoints.InstallationSites;
 
 internal static class InstallationSiteHandlers
 {
-    internal static async Task<Ok<IReadOnlyList<InstallationSiteDto>>> GetCollectionAsync(
-        IInstallationSiteQueryHandler queryHandler,
-        CancellationToken cancellationToken)
-    {
-        IReadOnlyList<InstallationSite> entities = await queryHandler.AnalyzeAsync(CreateDefaultAnalyzeRequest(), cancellationToken);
-        IReadOnlyList<InstallationSiteDto> dtos = entities.Select(InstallationSiteMapping.ToDto).ToList();
-        return TypedResults.Ok(dtos);
-    }
-
     internal static async Task<Results<Ok<IReadOnlyList<InstallationSiteDto>>, ValidationProblem>> AnalyzeAsync(
         InstallationSiteAnalyzeRequest body,
         IValidator<InstallationSiteAnalyzeRequest> validator,
@@ -29,9 +20,7 @@ internal static class InstallationSiteHandlers
     {
         FluentValidation.Results.ValidationResult validation = await validator.ValidateAsync(body, cancellationToken);
         if (!validation.IsValid)
-        {
             return validation.ToValidationProblem();
-        }
 
         IReadOnlyList<InstallationSite> entities = await queryHandler.AnalyzeAsync(body, cancellationToken);
         IReadOnlyList<InstallationSiteDto> dtos = entities.Select(InstallationSiteMapping.ToDto).ToList();
@@ -56,9 +45,7 @@ internal static class InstallationSiteHandlers
     {
         FluentValidation.Results.ValidationResult validation = await validator.ValidateAsync(dto, cancellationToken);
         if (!validation.IsValid)
-        {
             return validation.ToValidationProblem();
-        }
 
         int newId = await service.AddAsync(dto, cancellationToken);
         InstallationSite? created = await queryHandler.GetByIdAsync(newId, cancellationToken);
@@ -85,14 +72,10 @@ internal static class InstallationSiteHandlers
 
         FluentValidation.Results.ValidationResult validation = await validator.ValidateAsync(dto, cancellationToken);
         if (!validation.IsValid)
-        {
             return validation.ToValidationProblem();
-        }
 
         if (await queryHandler.GetByIdAsync(id, cancellationToken) is null)
-        {
             return TypedResults.NotFound();
-        }
 
         await service.UpdateAsync(dto, cancellationToken);
         return TypedResults.NoContent();
@@ -105,14 +88,9 @@ internal static class InstallationSiteHandlers
         CancellationToken cancellationToken)
     {
         if (await queryHandler.GetByIdAsync(id, cancellationToken) is null)
-        {
             return TypedResults.NotFound();
-        }
 
         await service.DeleteAsync(id, cancellationToken);
         return TypedResults.NoContent();
     }
-
-    private static InstallationSiteAnalyzeRequest CreateDefaultAnalyzeRequest() =>
-        new(Filter: null, SortBy: null);
 }
