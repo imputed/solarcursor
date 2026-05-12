@@ -15,8 +15,6 @@ public static class ApplicationDependencyInjection
         services.AddScoped<ILinearMotorService, LinearMotorService>();
         services.AddScoped<ITiltMeasuringUnitService, TiltMeasuringUnitService>();
         services.AddScoped<ICurrentMeasuringUnitService, CurrentMeasuringUnitService>();
-        services.AddScoped<ILinearMotorMovementService, LinearMotorMovementService>();
-
         return services;
     }
 }

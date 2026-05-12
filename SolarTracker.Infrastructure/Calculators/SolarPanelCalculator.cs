@@ -5,11 +5,11 @@ using SolarTracker.Application.Dtos;
 using SolarTracker.Application.Interfaces.Calculators;
 using SolarTracker.Application.Interfaces.QueryHandlers;
 using SolarTracker.Application.Interfaces.Repositories;
-using SolarTracker.Application.Interfaces.Services;
 using SolarTracker.Application.Results;
 using SolarTracker.Domain.Abstractions;
 using SolarTracker.Domain.Entities;
 using SolarTracker.Domain.ValueObjects;
+using SolarTracker.Infrastructure.Services;
 
 namespace SolarTracker.Infrastructure.Calculators;
 
@@ -17,7 +17,7 @@ public sealed class SolarPanelCalculator(
     ISolarPanelQueryHandler solarPanelQueryHandler,
     IInstallationSiteQueryHandler installationSiteQueryHandler,
     ISolarTrackingConfigurationRepository configurationRepository,
-    ILinearMotorMovementService linearMotorMovementService,
+    LinearMotorMovementService linearMotorMovementService,
     ITiltMeasuringUnitPositionReader tiltMeasuringUnitPositionReader,
     TimeProvider timeProvider,
     ILogger<SolarPanelCalculator> logger) : ISolarPanelCalculator
@@ -57,13 +57,18 @@ public sealed class SolarPanelCalculator(
                 return Result<SolarPanelCurrentPositionDto>.Success(currentState);
 
             bool moveUp = delta > 0d;
-            LinearMotorMoveRequest request = new(context.Configuration.StepDurationMs);
 
             foreach (LinearMotor linearMotor in context.SolarPanel.LinearMotors.OrderBy(motor => motor.Id))
             {
                 Result moveResult = moveUp
-                    ? await linearMotorMovementService.MoveUpAsync(linearMotor.Id, request, cancellationToken)
-                    : await linearMotorMovementService.MoveDownAsync(linearMotor.Id, request, cancellationToken);
+                    ? await linearMotorMovementService.MoveUpAsync(
+                        linearMotor.Id,
+                        context.Configuration.StepDurationMs,
+                        cancellationToken)
+                    : await linearMotorMovementService.MoveDownAsync(
+                        linearMotor.Id,
+                        context.Configuration.StepDurationMs,
+                        cancellationToken);
 
                 if (!moveResult.IsSuccess)
                 {

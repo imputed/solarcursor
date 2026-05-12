@@ -45,6 +45,7 @@ public static class DependencyInjection
         services.AddScoped<ILinearMotorQueryHandler, LinearMotorQueryHandler>();
         services.AddScoped<ITiltMeasuringUnitQueryHandler, TiltMeasuringUnitQueryHandler>();
         services.AddScoped<ICurrentMeasuringUnitQueryHandler, CurrentMeasuringUnitQueryHandler>();
+        services.AddScoped<LinearMotorMovementService>();
         services.AddScoped<ISolarPanelCalculator, SolarPanelCalculator>();
         services.AddSingleton(TimeProvider.System);
         services.AddHostedService<SolarPanelOptimizationBackgroundService>();

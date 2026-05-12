@@ -1,11 +1,10 @@
 using Moq;
-using SolarTracker.Application.Dtos;
 using SolarTracker.Application.Interfaces.Hardware;
 using SolarTracker.Application.Interfaces.QueryHandlers;
-using SolarTracker.Application.Interfaces.Services;
 using SolarTracker.Domain.Entities;
+using SolarTracker.Infrastructure.Services;
 
-namespace SolarTracker.Tests.UnitTests.Application.Services;
+namespace SolarTracker.Tests.UnitTests.Infrastructure.Services;
 
 public sealed class LinearMotorMovementServiceUnitTests
 {
@@ -28,7 +27,7 @@ public sealed class LinearMotorMovementServiceUnitTests
             actuator.Object);
 
         // Act
-        var result = await service.MoveUpAsync(4, new LinearMotorMoveRequest(600), cancellationToken);
+        var result = await service.MoveUpAsync(4, 600, cancellationToken);
 
         // Assert
         Assert.True(result.IsNotFound);
@@ -63,7 +62,7 @@ public sealed class LinearMotorMovementServiceUnitTests
             actuator.Object);
 
         // Act
-        var result = await service.MoveUpAsync(4, new LinearMotorMoveRequest(600), cancellationToken);
+        var result = await service.MoveUpAsync(4, 600, cancellationToken);
 
         // Assert
         Assert.True(result.IsNotFound);
@@ -94,7 +93,7 @@ public sealed class LinearMotorMovementServiceUnitTests
             actuator.Object);
 
         // Act
-        var result = await service.MoveDownAsync(4, new LinearMotorMoveRequest(600), cancellationToken);
+        var result = await service.MoveDownAsync(4, 600, cancellationToken);
 
         // Assert
         Assert.True(result.IsNotFound);
@@ -131,7 +130,7 @@ public sealed class LinearMotorMovementServiceUnitTests
             actuator.Object);
 
         // Act
-        var result = await service.MoveUpAsync(4, new LinearMotorMoveRequest(650), cancellationToken);
+        var result = await service.MoveUpAsync(4, 650, cancellationToken);
 
         // Assert
         Assert.True(result.IsSuccess);
@@ -178,7 +177,7 @@ public sealed class LinearMotorMovementServiceUnitTests
             actuator.Object);
 
         // Act
-        var result = await service.MoveDownAsync(4, new LinearMotorMoveRequest(700), cancellationToken);
+        var result = await service.MoveDownAsync(4, 700, cancellationToken);
 
         // Assert
         Assert.True(result.IsSuccess);

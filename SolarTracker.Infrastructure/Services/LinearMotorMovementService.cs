@@ -1,24 +1,22 @@
-using SolarTracker.Application.Dtos;
 using SolarTracker.Application.Interfaces.Hardware;
 using SolarTracker.Application.Interfaces.QueryHandlers;
-using SolarTracker.Application.Interfaces.Services;
 using SolarTracker.Application.Results;
 
-namespace SolarTracker.Application.Interfaces.Services;
+namespace SolarTracker.Infrastructure.Services;
 
 public sealed class LinearMotorMovementService(
     ILinearMotorQueryHandler linearMotorQueryHandler,
     ISolarPanelQueryHandler solarPanelQueryHandler,
     IInstallationSiteQueryHandler installationSiteQueryHandler,
-    ILinearMotorActuator actuator) : ILinearMotorMovementService
+    ILinearMotorActuator actuator)
 {
     public async ValueTask<Result> MoveUpAsync(
         int linearMotorId,
-        LinearMotorMoveRequest request,
+        int durationMs,
         CancellationToken cancellationToken)
     {
         Result<LinearMotorMovementContext> contextResult =
-            await BuildContextAsync(linearMotorId, request, cancellationToken);
+            await BuildContextAsync(linearMotorId, durationMs, cancellationToken);
         if (!contextResult.IsSuccess)
         {
             ResultError error = contextResult.Error!.Value;
@@ -31,11 +29,11 @@ public sealed class LinearMotorMovementService(
 
     public async ValueTask<Result> MoveDownAsync(
         int linearMotorId,
-        LinearMotorMoveRequest request,
+        int durationMs,
         CancellationToken cancellationToken)
     {
         Result<LinearMotorMovementContext> contextResult =
-            await BuildContextAsync(linearMotorId, request, cancellationToken);
+            await BuildContextAsync(linearMotorId, durationMs, cancellationToken);
         if (!contextResult.IsSuccess)
         {
             ResultError error = contextResult.Error!.Value;
@@ -48,7 +46,7 @@ public sealed class LinearMotorMovementService(
 
     private async ValueTask<Result<LinearMotorMovementContext>> BuildContextAsync(
         int linearMotorId,
-        LinearMotorMoveRequest request,
+        int durationMs,
         CancellationToken cancellationToken)
     {
         var linearMotor = await linearMotorQueryHandler.GetByIdAsync(linearMotorId, cancellationToken);
@@ -77,6 +75,6 @@ public sealed class LinearMotorMovementService(
                 installationSite.Longitude,
                 linearMotor.MoveUpGpioPin,
                 linearMotor.MoveDownGpioPin,
-                request.DurationMs));
+                durationMs));
     }
 }

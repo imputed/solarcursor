@@ -26,7 +26,6 @@ namespace SolarTracker.Api.Serialization;
 [JsonSerializable(typeof(LinearMotorDto))]
 [JsonSerializable(typeof(CreateLinearMotorDto))]
 [JsonSerializable(typeof(UpdateLinearMotorDto))]
-[JsonSerializable(typeof(LinearMotorMoveRequest))]
 [JsonSerializable(typeof(IReadOnlyList<LinearMotorDto>))]
 [JsonSerializable(typeof(List<LinearMotorDto>))]
 [JsonSerializable(typeof(TiltMeasuringUnitDto))]

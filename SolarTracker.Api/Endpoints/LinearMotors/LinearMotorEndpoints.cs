@@ -34,18 +34,6 @@ internal static class LinearMotorEndpoints
             .Produces(StatusCodes.Status404NotFound)
             .ProducesValidationProblem(StatusCodes.Status400BadRequest);
 
-        group.MapPost("/{id:int}/move-up", LinearMotorHandlers.MoveUpAsync)
-            .WithName("MoveLinearMotorUp")
-            .Produces(StatusCodes.Status204NoContent)
-            .Produces(StatusCodes.Status404NotFound)
-            .ProducesValidationProblem(StatusCodes.Status400BadRequest);
-
-        group.MapPost("/{id:int}/move-down", LinearMotorHandlers.MoveDownAsync)
-            .WithName("MoveLinearMotorDown")
-            .Produces(StatusCodes.Status204NoContent)
-            .Produces(StatusCodes.Status404NotFound)
-            .ProducesValidationProblem(StatusCodes.Status400BadRequest);
-
         group.MapDelete("/{id:int}", LinearMotorHandlers.DeleteAsync)
             .WithName("DeleteLinearMotor")
             .Produces(StatusCodes.Status204NoContent)
