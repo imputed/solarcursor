@@ -7,7 +7,5 @@ public interface IInstallationSiteQueryHandler
 {
     ValueTask<InstallationSite?> GetByIdAsync(int id, CancellationToken cancellationToken);
 
-    ValueTask<IReadOnlyList<InstallationSite>> AnalyzeAsync(
-        InstallationSiteAnalyzeRequest request,
-        CancellationToken cancellationToken);
+    ValueTask<IReadOnlyList<InstallationSite>> AnalyzeAsync(InstallationSiteAnalyzeRequest request, CancellationToken cancellationToken);
 }

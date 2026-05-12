@@ -1,5 +1,3 @@
-using Innovative.Geometry;
-using Innovative.SolarCalculator;
 using Microsoft.Extensions.Logging;
 using SolarTracker.Application.Errors;
 using SolarTracker.Application.Dtos;
@@ -21,6 +19,7 @@ public sealed class SolarPanelCalculator(
     ISolarTrackingConfigurationRepository configurationRepository,
     LinearMotorMovementService linearMotorMovementService,
     ITiltMeasuringUnitPositionReader tiltMeasuringUnitPositionReader,
+    ISolarOptimalPositionCalculator solarOptimalPositionCalculator,
     TimeProvider timeProvider,
     ILogger<SolarPanelCalculator> logger) : ISolarPanelCalculator
 {
@@ -130,21 +129,14 @@ public sealed class SolarPanelCalculator(
         TiltMeasurement measurement = await context.SolarPanel.TiltMeasuringUnit!
             .GetCurrentPosition(tiltMeasuringUnitPositionReader, cancellationToken);
 
-        double optimalPosition = CalculateOptimalPosition(
-            context.InstallationSite.Latitude,
-            context.InstallationSite.Longitude);
+        double optimalPosition = context.InstallationSite.GetOptimalPosition(
+            solarOptimalPositionCalculator,
+            timeProvider.GetUtcNow());
 
         return new SolarPanelCurrentPositionDto(
             context.SolarPanel.Id,
             optimalPosition,
             measurement.Degrees);
-    }
-
-    private double CalculateOptimalPosition(decimal latitude, decimal longitude)
-    {
-        DateTimeOffset now = timeProvider.GetUtcNow();
-        SolarTimes solarTimes = new(now, new Angle(latitude), new Angle(longitude));
-        return Math.Clamp((double)solarTimes.SolarZenith, 0d, 90d);
     }
 
     private async ValueTask<Result<SolarPanelCurrentPositionDto>> HandleMovementFailureAsync(

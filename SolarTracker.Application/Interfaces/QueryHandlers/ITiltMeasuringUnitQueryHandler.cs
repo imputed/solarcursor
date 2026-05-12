@@ -7,7 +7,5 @@ public interface ITiltMeasuringUnitQueryHandler
 {
     ValueTask<TiltMeasuringUnit?> GetByIdAsync(int id, CancellationToken cancellationToken);
 
-    ValueTask<IReadOnlyList<TiltMeasuringUnit>> AnalyzeAsync(
-        TiltMeasuringUnitAnalyzeRequest request,
-        CancellationToken cancellationToken);
+    ValueTask<IReadOnlyList<TiltMeasuringUnit>> AnalyzeAsync(TiltMeasuringUnitAnalyzeRequest request, CancellationToken cancellationToken);
 }

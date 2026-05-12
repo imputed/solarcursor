@@ -5,7 +5,5 @@ namespace SolarTracker.Domain.Abstractions;
 
 public interface ITiltMeasuringUnitPositionReader
 {
-    ValueTask<TiltMeasurement> GetCurrentPositionAsync(
-        TiltMeasuringUnit unit,
-        CancellationToken cancellationToken);
+    ValueTask<TiltMeasurement> GetCurrentPositionAsync(TiltMeasuringUnit unit, CancellationToken cancellationToken);
 }

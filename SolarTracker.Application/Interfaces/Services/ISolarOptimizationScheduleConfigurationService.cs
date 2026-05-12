@@ -6,7 +6,5 @@ public interface ISolarOptimizationScheduleConfigurationService
 {
     ValueTask<SolarOptimizationScheduleConfigurationDto> GetAsync(CancellationToken cancellationToken);
 
-    ValueTask<SolarOptimizationScheduleConfigurationDto> UpdateAsync(
-        UpdateSolarOptimizationScheduleConfigurationDto dto,
-        CancellationToken cancellationToken);
+    ValueTask<SolarOptimizationScheduleConfigurationDto> UpdateAsync(UpdateSolarOptimizationScheduleConfigurationDto dto, CancellationToken cancellationToken);
 }

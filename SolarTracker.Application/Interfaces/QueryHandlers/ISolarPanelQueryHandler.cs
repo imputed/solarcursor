@@ -7,7 +7,5 @@ public interface ISolarPanelQueryHandler
 {
     ValueTask<SolarPanel?> GetByIdAsync(int id, CancellationToken cancellationToken);
 
-    ValueTask<IReadOnlyList<SolarPanel>> AnalyzeAsync(
-        SolarPanelAnalyzeRequest request,
-        CancellationToken cancellationToken);
+    ValueTask<IReadOnlyList<SolarPanel>> AnalyzeAsync(SolarPanelAnalyzeRequest request, CancellationToken cancellationToken);
 }

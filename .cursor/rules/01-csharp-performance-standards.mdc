@@ -19,6 +19,7 @@ alwaysApply: false
 - Explicit constructors are allowed only for framework behavior, serializer compatibility, inheritance constraints, compiler limitations, or materially better readability.
 - Do not use default values for `CancellationToken`; require the token explicitly.
 - Use `ValueTask` for hot-path I/O contracts when it provides a measurable benefit.
+- Write interface method declarations as one-liners, for example `ValueTask<TiltMeasurement> GetCurrentPositionAsync(TiltMeasuringUnit unit, CancellationToken cancellationToken);`.
 
 # API and Quality
 

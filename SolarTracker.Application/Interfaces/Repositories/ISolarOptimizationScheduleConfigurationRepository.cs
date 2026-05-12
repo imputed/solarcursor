@@ -6,7 +6,5 @@ public interface ISolarOptimizationScheduleConfigurationRepository
 {
     ValueTask<SolarOptimizationScheduleConfiguration> GetAsync(CancellationToken cancellationToken);
 
-    ValueTask<SolarOptimizationScheduleConfiguration> UpsertAsync(
-        SolarOptimizationScheduleConfiguration entity,
-        CancellationToken cancellationToken);
+    ValueTask<SolarOptimizationScheduleConfiguration> UpsertAsync(SolarOptimizationScheduleConfiguration entity, CancellationToken cancellationToken);
 }

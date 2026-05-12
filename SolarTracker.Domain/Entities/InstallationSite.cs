@@ -1,3 +1,5 @@
+using SolarTracker.Domain.Abstractions;
+
 namespace SolarTracker.Domain.Entities;
 
 public sealed class InstallationSite
@@ -11,4 +13,10 @@ public sealed class InstallationSite
     public decimal Longitude { get; set; }
 
     public ICollection<SolarPanel> SolarPanels { get; set; } = [];
+
+    public double GetOptimalPosition(ISolarOptimalPositionCalculator calculator, DateTimeOffset timestamp)
+    {
+        ArgumentNullException.ThrowIfNull(calculator);
+        return calculator.CalculateOptimalPosition(Latitude, Longitude, timestamp);
+    }
 }

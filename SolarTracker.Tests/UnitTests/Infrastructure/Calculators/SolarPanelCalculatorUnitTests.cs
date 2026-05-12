@@ -40,6 +40,7 @@ public sealed class SolarPanelCalculatorUnitTests
         Mock<ILinearMotorQueryHandler> linearMotorQueryHandler = new();
         Mock<ISolarTrackingConfigurationRepository> configurationRepository = new();
         Mock<ITiltMeasuringUnitPositionReader> tiltMeasuringUnitPositionReader = new();
+        Mock<ISolarOptimalPositionCalculator> solarOptimalPositionCalculator = new();
         Mock<ISteeringCommandReceiver> receiver = new();
         Mock<ILogger<SolarPanelCalculator>> logger = new();
 
@@ -51,6 +52,8 @@ public sealed class SolarPanelCalculatorUnitTests
             .Returns(ValueTask.FromResult(configuration));
         tiltMeasuringUnitPositionReader.Setup(x => x.GetCurrentPositionAsync(It.IsAny<TiltMeasuringUnit>(), cancellationToken))
             .Returns(ValueTask.FromResult(new TiltMeasurement(0d, DateTime.UtcNow)));
+        solarOptimalPositionCalculator.Setup(x => x.CalculateOptimalPosition(50.1m, 8.6m, It.IsAny<DateTimeOffset>()))
+            .Returns(45d);
         linearMotorQueryHandler.SetupSequence(x => x.GetByIdAsync(1, cancellationToken))
             .Returns(ValueTask.FromResult<LinearMotor?>(motor1))
             .Returns(ValueTask.FromResult<LinearMotor?>(motor1));
@@ -73,6 +76,7 @@ public sealed class SolarPanelCalculatorUnitTests
             configurationRepository.Object,
             movementService,
             tiltMeasuringUnitPositionReader.Object,
+            solarOptimalPositionCalculator.Object,
             new FixedTimeProvider(new DateTimeOffset(2026, 12, 21, 0, 0, 0, TimeSpan.Zero)),
             logger.Object);
 
@@ -125,6 +129,7 @@ public sealed class SolarPanelCalculatorUnitTests
         Mock<ILinearMotorQueryHandler> linearMotorQueryHandler = new();
         Mock<ISolarTrackingConfigurationRepository> configurationRepository = new();
         Mock<ITiltMeasuringUnitPositionReader> tiltMeasuringUnitPositionReader = new();
+        Mock<ISolarOptimalPositionCalculator> solarOptimalPositionCalculator = new();
         Mock<ISteeringCommandReceiver> receiver = new();
         Mock<ILogger<SolarPanelCalculator>> logger = new();
 
@@ -136,6 +141,8 @@ public sealed class SolarPanelCalculatorUnitTests
             .Returns(ValueTask.FromResult(configuration));
         tiltMeasuringUnitPositionReader.Setup(x => x.GetCurrentPositionAsync(It.IsAny<TiltMeasuringUnit>(), cancellationToken))
             .Returns(ValueTask.FromResult(new TiltMeasurement(0d, DateTime.UtcNow)));
+        solarOptimalPositionCalculator.Setup(x => x.CalculateOptimalPosition(50.1m, 8.6m, It.IsAny<DateTimeOffset>()))
+            .Returns(45d);
         linearMotorQueryHandler.SetupSequence(x => x.GetByIdAsync(1, cancellationToken))
             .Returns(ValueTask.FromResult<LinearMotor?>(motor1))
             .Returns(ValueTask.FromResult<LinearMotor?>(null));
@@ -156,6 +163,7 @@ public sealed class SolarPanelCalculatorUnitTests
             configurationRepository.Object,
             movementService,
             tiltMeasuringUnitPositionReader.Object,
+            solarOptimalPositionCalculator.Object,
             new FixedTimeProvider(new DateTimeOffset(2026, 12, 21, 0, 0, 0, TimeSpan.Zero)),
             logger.Object);
 

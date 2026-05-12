@@ -5,11 +5,7 @@ namespace SolarTracker.Application.Interfaces.Calculators;
 
 public interface ISolarPanelCalculator
 {
-    ValueTask<Result<SolarPanelCurrentPositionDto>> GetCurrentPositionAsync(
-        int solarPanelId,
-        CancellationToken cancellationToken);
+    ValueTask<Result<SolarPanelCurrentPositionDto>> GetCurrentPositionAsync(int solarPanelId, CancellationToken cancellationToken);
 
-    ValueTask<Result<SolarPanelCurrentPositionDto>> MoveToOptimumAsync(
-        int solarPanelId,
-        CancellationToken cancellationToken);
+    ValueTask<Result<SolarPanelCurrentPositionDto>> MoveToOptimumAsync(int solarPanelId, CancellationToken cancellationToken);
 }
