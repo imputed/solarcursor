@@ -1,9 +1,11 @@
 using System.Device.Gpio;
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
+using SolarTracker.Infrastructure.Errors;
 using SolarTracker.Domain.Abstractions;
 using SolarTracker.Domain.Entities;
 using SolarTracker.Domain.ValueObjects;
+using SolarTracker.Infrastructure.Logging;
 
 namespace SolarTracker.Infrastructure.Hardware;
 
@@ -29,11 +31,7 @@ public sealed class RaspberryPiTiltMeasuringUnitPositionReader(
         double averagedDutyCycle = dutyCycleSum / SampleCount;
         double degrees = Math.Clamp(averagedDutyCycle * MaxTiltDegrees, 0d, MaxTiltDegrees);
 
-        logger.LogInformation(
-            "Read tilt {Degrees} degrees from measuring unit {TiltMeasuringUnitId} on GPIO pin {GpioPin}.",
-            degrees,
-            unit.Id,
-            unit.GpioPin);
+        InfrastructureLog.ReadTiltPosition(logger, degrees, unit.Id, unit.GpioPin);
 
         return new TiltMeasurement(degrees, DateTime.UtcNow);
     }
@@ -61,7 +59,7 @@ public sealed class RaspberryPiTiltMeasuringUnitPositionReader(
 
         double periodMs = highStopwatch.Elapsed.TotalMilliseconds + lowStopwatch.Elapsed.TotalMilliseconds;
         if (periodMs <= 0d)
-            throw new InvalidOperationException("PWM period must be greater than zero.");
+            throw new InvalidOperationException(InfrastructureTextCatalog.PwmPeriodMustBeGreaterThanZero());
 
         return highStopwatch.Elapsed.TotalMilliseconds / periodMs;
     }

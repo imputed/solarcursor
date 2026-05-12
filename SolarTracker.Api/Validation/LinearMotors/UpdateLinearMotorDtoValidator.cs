@@ -1,5 +1,6 @@
 using FluentValidation;
 using SolarTracker.Application.Dtos;
+using SolarTracker.Api.Validation;
 
 namespace SolarTracker.Api.Validation.LinearMotors;
 
@@ -13,6 +14,6 @@ public sealed class UpdateLinearMotorDtoValidator : AbstractValidator<UpdateLine
         RuleFor(d => d.MoveUpGpioPin).InclusiveBetween(0, 27);
         RuleFor(d => d.MoveDownGpioPin).InclusiveBetween(0, 27);
         RuleFor(d => d).Must(d => d.MoveUpGpioPin != d.MoveDownGpioPin)
-            .WithMessage("MoveUpGpioPin and MoveDownGpioPin must differ.");
+            .WithMessage(ValidationMessageCatalog.MovePinsMustDiffer());
     }
 }

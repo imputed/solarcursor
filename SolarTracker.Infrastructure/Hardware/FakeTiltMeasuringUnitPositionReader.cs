@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using SolarTracker.Domain.Abstractions;
 using SolarTracker.Domain.Entities;
 using SolarTracker.Domain.ValueObjects;
+using SolarTracker.Infrastructure.Logging;
 
 namespace SolarTracker.Infrastructure.Hardware;
 
@@ -14,10 +15,7 @@ public sealed class FakeTiltMeasuringUnitPositionReader(
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        logger.LogInformation(
-            "Simulating tilt read for measuring unit {TiltMeasuringUnitId} on GPIO pin {GpioPin}.",
-            unit.Id,
-            unit.GpioPin);
+        InfrastructureLog.SimulatingTiltRead(logger, unit.Id, unit.GpioPin);
 
         return ValueTask.FromResult(new TiltMeasurement(45d, DateTime.UtcNow));
     }

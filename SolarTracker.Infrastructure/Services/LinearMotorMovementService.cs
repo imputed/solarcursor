@@ -1,6 +1,9 @@
+using Microsoft.Extensions.Logging;
+using SolarTracker.Application.Errors;
 using SolarTracker.Application.Interfaces.Hardware;
 using SolarTracker.Application.Interfaces.QueryHandlers;
 using SolarTracker.Application.Results;
+using SolarTracker.Infrastructure.Logging;
 
 namespace SolarTracker.Infrastructure.Services;
 
@@ -8,7 +11,8 @@ public sealed class LinearMotorMovementService(
     ILinearMotorQueryHandler linearMotorQueryHandler,
     ISolarPanelQueryHandler solarPanelQueryHandler,
     IInstallationSiteQueryHandler installationSiteQueryHandler,
-    ILinearMotorActuator actuator)
+    ILinearMotorActuator actuator,
+    ILogger<LinearMotorMovementService> logger)
 {
     public async ValueTask<Result> MoveUpAsync(
         int linearMotorId,
@@ -51,21 +55,29 @@ public sealed class LinearMotorMovementService(
     {
         var linearMotor = await linearMotorQueryHandler.GetByIdAsync(linearMotorId, cancellationToken);
         if (linearMotor is null)
-            return Result<LinearMotorMovementContext>.NotFound(
-                "linear-motor-not-found",
-                $"Linear motor {linearMotorId} was not found.");
+        {
+            InfrastructureLog.LinearMotorNotFound(logger, linearMotorId);
+            return Result<LinearMotorMovementContext>.NotFound(SolarTrackerErrorCatalog.LinearMotor.NotFound(linearMotorId));
+        }
 
         var solarPanel = await solarPanelQueryHandler.GetByIdAsync(linearMotor.SolarPanelId, cancellationToken);
         if (solarPanel is null)
+        {
+            InfrastructureLog.SolarPanelNotFoundForLinearMotor(logger, linearMotor.SolarPanelId, linearMotorId);
             return Result<LinearMotorMovementContext>.NotFound(
-                "solar-panel-not-found",
-                $"Solar panel {linearMotor.SolarPanelId} was not found.");
+                SolarTrackerErrorCatalog.SolarPanel.NotFound(linearMotor.SolarPanelId));
+        }
 
         var installationSite = await installationSiteQueryHandler.GetByIdAsync(solarPanel.InstallationSiteId, cancellationToken);
         if (installationSite is null)
+        {
+            InfrastructureLog.InstallationSiteNotFoundForLinearMotor(
+                logger,
+                solarPanel.InstallationSiteId,
+                linearMotorId);
             return Result<LinearMotorMovementContext>.NotFound(
-                "installation-site-not-found",
-                $"Installation site {solarPanel.InstallationSiteId} was not found.");
+                SolarTrackerErrorCatalog.InstallationSite.NotFound(solarPanel.InstallationSiteId));
+        }
 
         return Result<LinearMotorMovementContext>.Success(
             new LinearMotorMovementContext(

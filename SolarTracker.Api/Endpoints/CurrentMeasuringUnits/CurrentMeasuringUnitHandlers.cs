@@ -1,11 +1,15 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.Extensions.Logging;
 using SolarTracker.Application.Analysis;
 using SolarTracker.Application.Dtos;
 using SolarTracker.Application.Interfaces.QueryHandlers;
 using SolarTracker.Application.Interfaces.Services;
 using SolarTracker.Application.Mapping;
+using SolarTracker.Api.Errors;
 using SolarTracker.Api.Infrastructure;
+using SolarTracker.Api.Logging;
+using SolarTracker.Api.Routing;
 using SolarTracker.Domain.Entities;
 
 namespace SolarTracker.Api.Endpoints.CurrentMeasuringUnits;
@@ -36,11 +40,12 @@ internal static class CurrentMeasuringUnitHandlers
         return entity is null ? TypedResults.NotFound() : TypedResults.Ok(CurrentMeasuringUnitMapping.ToDto(entity));
     }
 
-    internal static async Task<Results<Created<CurrentMeasuringUnitDto>, ValidationProblem>> CreateAsync(
+    internal static async Task<Results<Created<CurrentMeasuringUnitDto>, ValidationProblem, ProblemHttpResult>> CreateAsync(
         CreateCurrentMeasuringUnitDto dto,
         IValidator<CreateCurrentMeasuringUnitDto> validator,
         ICurrentMeasuringUnitService service,
         ICurrentMeasuringUnitQueryHandler queryHandler,
+        ILoggerFactory loggerFactory,
         CancellationToken cancellationToken)
     {
         FluentValidation.Results.ValidationResult validation = await validator.ValidateAsync(dto, cancellationToken);
@@ -51,10 +56,16 @@ internal static class CurrentMeasuringUnitHandlers
         CurrentMeasuringUnit? created = await queryHandler.GetByIdAsync(newId, cancellationToken);
         if (created is null)
         {
-            return TypedResults.ValidationProblem(new Dictionary<string, string[]> { ["_"] = ["Entity was not persisted."] });
+            ILogger logger = loggerFactory.CreateLogger(typeof(CurrentMeasuringUnitHandlers).FullName!);
+            ApiLog.CreatePersistenceReadFailed(logger, ApiProblemCatalog.CurrentMeasuringUnitEntityName, newId);
+            var problem = ApiProblemCatalog.CurrentMeasuringUnitPersistenceFailed(newId);
+            return TypedResults.Problem(
+                title: problem.Title,
+                detail: problem.Detail,
+                statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return TypedResults.Created($"/api/current-measuring-units/{newId}", CurrentMeasuringUnitMapping.ToDto(created));
+        return TypedResults.Created(ApiRouteCatalog.CurrentMeasuringUnitById(newId), CurrentMeasuringUnitMapping.ToDto(created));
     }
 
     internal static async Task<Results<NoContent, NotFound, ValidationProblem>> PutAsync(
@@ -66,9 +77,7 @@ internal static class CurrentMeasuringUnitHandlers
         CancellationToken cancellationToken)
     {
         if (id != dto.Id)
-        {
-            return TypedResults.ValidationProblem(new Dictionary<string, string[]> { ["id"] = ["Route id must equal body Id."] });
-        }
+            return TypedResults.ValidationProblem(ApiProblemCatalog.RouteIdMustEqualBodyId());
 
         FluentValidation.Results.ValidationResult validation = await validator.ValidateAsync(dto, cancellationToken);
         if (!validation.IsValid)

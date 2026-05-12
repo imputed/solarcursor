@@ -1,11 +1,15 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.Extensions.Logging;
 using SolarTracker.Application.Analysis;
 using SolarTracker.Application.Dtos;
 using SolarTracker.Application.Interfaces.QueryHandlers;
 using SolarTracker.Application.Interfaces.Services;
 using SolarTracker.Application.Mapping;
+using SolarTracker.Api.Errors;
 using SolarTracker.Api.Infrastructure;
+using SolarTracker.Api.Logging;
+using SolarTracker.Api.Routing;
 using SolarTracker.Domain.Entities;
 
 namespace SolarTracker.Api.Endpoints.TiltMeasuringUnits;
@@ -36,11 +40,12 @@ internal static class TiltMeasuringUnitHandlers
         return entity is null ? TypedResults.NotFound() : TypedResults.Ok(TiltMeasuringUnitMapping.ToDto(entity));
     }
 
-    internal static async Task<Results<Created<TiltMeasuringUnitDto>, ValidationProblem>> CreateAsync(
+    internal static async Task<Results<Created<TiltMeasuringUnitDto>, ValidationProblem, ProblemHttpResult>> CreateAsync(
         CreateTiltMeasuringUnitDto dto,
         IValidator<CreateTiltMeasuringUnitDto> validator,
         ITiltMeasuringUnitService service,
         ITiltMeasuringUnitQueryHandler queryHandler,
+        ILoggerFactory loggerFactory,
         CancellationToken cancellationToken)
     {
         FluentValidation.Results.ValidationResult validation = await validator.ValidateAsync(dto, cancellationToken);
@@ -51,10 +56,16 @@ internal static class TiltMeasuringUnitHandlers
         TiltMeasuringUnit? created = await queryHandler.GetByIdAsync(newId, cancellationToken);
         if (created is null)
         {
-            return TypedResults.ValidationProblem(new Dictionary<string, string[]> { ["_"] = ["Entity was not persisted."] });
+            ILogger logger = loggerFactory.CreateLogger(typeof(TiltMeasuringUnitHandlers).FullName!);
+            ApiLog.CreatePersistenceReadFailed(logger, ApiProblemCatalog.TiltMeasuringUnitEntityName, newId);
+            var problem = ApiProblemCatalog.TiltMeasuringUnitPersistenceFailed(newId);
+            return TypedResults.Problem(
+                title: problem.Title,
+                detail: problem.Detail,
+                statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return TypedResults.Created($"/api/tilt-measuring-units/{newId}", TiltMeasuringUnitMapping.ToDto(created));
+        return TypedResults.Created(ApiRouteCatalog.TiltMeasuringUnitById(newId), TiltMeasuringUnitMapping.ToDto(created));
     }
 
     internal static async Task<Results<NoContent, NotFound, ValidationProblem>> PutAsync(
@@ -66,9 +77,7 @@ internal static class TiltMeasuringUnitHandlers
         CancellationToken cancellationToken)
     {
         if (id != dto.Id)
-        {
-            return TypedResults.ValidationProblem(new Dictionary<string, string[]> { ["id"] = ["Route id must equal body Id."] });
-        }
+            return TypedResults.ValidationProblem(ApiProblemCatalog.RouteIdMustEqualBodyId());
 
         FluentValidation.Results.ValidationResult validation = await validator.ValidateAsync(dto, cancellationToken);
         if (!validation.IsValid)

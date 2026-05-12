@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using SolarTracker.Application.Dtos;
 using SolarTracker.Application.Interfaces.QueryHandlers;
@@ -19,7 +20,8 @@ public sealed class SolarTrackingConfigurationServiceUnitTests
         solarPanelQueryHandler.Setup(x => x.GetByIdAsync(7, cancellationToken))
             .Returns(ValueTask.FromResult<SolarPanel?>(null));
 
-        SolarTrackingConfigurationService service = new(repository.Object, solarPanelQueryHandler.Object);
+        SolarTrackingConfigurationService service =
+            new(repository.Object, solarPanelQueryHandler.Object, NullLogger<SolarTrackingConfigurationService>.Instance);
 
         // Act
         var result = await service.GetAsync(7, cancellationToken);
@@ -48,7 +50,8 @@ public sealed class SolarTrackingConfigurationServiceUnitTests
                 MaxAdjustmentSteps = 30,
             }));
 
-        SolarTrackingConfigurationService service = new(repository.Object, solarPanelQueryHandler.Object);
+        SolarTrackingConfigurationService service =
+            new(repository.Object, solarPanelQueryHandler.Object, NullLogger<SolarTrackingConfigurationService>.Instance);
 
         // Act
         var result = await service.GetAsync(7, cancellationToken);
@@ -68,7 +71,8 @@ public sealed class SolarTrackingConfigurationServiceUnitTests
         solarPanelQueryHandler.Setup(x => x.GetByIdAsync(7, cancellationToken))
             .Returns(ValueTask.FromResult<SolarPanel?>(null));
 
-        SolarTrackingConfigurationService service = new(repository.Object, solarPanelQueryHandler.Object);
+        SolarTrackingConfigurationService service =
+            new(repository.Object, solarPanelQueryHandler.Object, NullLogger<SolarTrackingConfigurationService>.Instance);
 
         // Act
         var result = await service.UpdateAsync(7, new UpdateSolarTrackingConfigurationDto(2.5d, 700, 30), cancellationToken);
@@ -102,7 +106,8 @@ public sealed class SolarTrackingConfigurationServiceUnitTests
                 MaxAdjustmentSteps = 30,
             }));
 
-        SolarTrackingConfigurationService service = new(repository.Object, solarPanelQueryHandler.Object);
+        SolarTrackingConfigurationService service =
+            new(repository.Object, solarPanelQueryHandler.Object, NullLogger<SolarTrackingConfigurationService>.Instance);
         UpdateSolarTrackingConfigurationDto dto = new(2.5d, 700, 30);
 
         // Act

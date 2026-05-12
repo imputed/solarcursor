@@ -1,3 +1,6 @@
+using Microsoft.Extensions.Logging;
+using SolarTracker.Application.Logging;
+using SolarTracker.Application.Errors;
 using SolarTracker.Application.Dtos;
 using SolarTracker.Application.Interfaces.QueryHandlers;
 using SolarTracker.Application.Interfaces.Repositories;
@@ -10,19 +13,23 @@ namespace SolarTracker.Application.Interfaces.Services;
 
 public sealed class SolarTrackingConfigurationService(
     ISolarTrackingConfigurationRepository repository,
-    ISolarPanelQueryHandler solarPanelQueryHandler) : ISolarTrackingConfigurationService
+    ISolarPanelQueryHandler solarPanelQueryHandler,
+    ILogger<SolarTrackingConfigurationService> logger) : ISolarTrackingConfigurationService
 {
     public async ValueTask<Result<SolarTrackingConfigurationDto>> GetAsync(
         int solarPanelId,
         CancellationToken cancellationToken)
     {
         if (await solarPanelQueryHandler.GetByIdAsync(solarPanelId, cancellationToken) is null)
-            return Result<SolarTrackingConfigurationDto>.NotFound(
-                "solar-panel-not-found",
-                $"Solar panel {solarPanelId} was not found.");
+        {
+            ApplicationLog.SolarPanelNotFoundForTrackingConfiguration(logger, solarPanelId);
+            return Result<SolarTrackingConfigurationDto>.NotFound(SolarTrackerErrorCatalog.SolarPanel.NotFound(solarPanelId));
+        }
 
         SolarTrackingConfiguration entity = await repository.GetBySolarPanelIdAsync(solarPanelId, cancellationToken);
-        return Result<SolarTrackingConfigurationDto>.Success(SolarTrackingConfigurationMapping.ToDto(entity));
+        SolarTrackingConfigurationDto dto = SolarTrackingConfigurationMapping.ToDto(entity);
+        ApplicationLog.RetrievedSolarTrackingConfiguration(logger, solarPanelId);
+        return Result<SolarTrackingConfigurationDto>.Success(dto);
     }
 
     public async ValueTask<Result<SolarTrackingConfigurationDto>> UpdateAsync(
@@ -31,12 +38,20 @@ public sealed class SolarTrackingConfigurationService(
         CancellationToken cancellationToken)
     {
         if (await solarPanelQueryHandler.GetByIdAsync(solarPanelId, cancellationToken) is null)
-            return Result<SolarTrackingConfigurationDto>.NotFound(
-                "solar-panel-not-found",
-                $"Solar panel {solarPanelId} was not found.");
+        {
+            ApplicationLog.SolarPanelNotFoundForTrackingConfiguration(logger, solarPanelId);
+            return Result<SolarTrackingConfigurationDto>.NotFound(SolarTrackerErrorCatalog.SolarPanel.NotFound(solarPanelId));
+        }
 
         SolarTrackingConfiguration entity = SolarTrackingConfigurationMapping.ToDomain(solarPanelId, dto);
         SolarTrackingConfiguration updated = await repository.UpsertAsync(entity, cancellationToken);
-        return Result<SolarTrackingConfigurationDto>.Success(SolarTrackingConfigurationMapping.ToDto(updated));
+        SolarTrackingConfigurationDto result = SolarTrackingConfigurationMapping.ToDto(updated);
+        ApplicationLog.UpdatedSolarTrackingConfiguration(
+            logger,
+            solarPanelId,
+            result.PositionThresholdDegrees,
+            result.StepDurationMs,
+            result.MaxAdjustmentSteps);
+        return Result<SolarTrackingConfigurationDto>.Success(result);
     }
 }

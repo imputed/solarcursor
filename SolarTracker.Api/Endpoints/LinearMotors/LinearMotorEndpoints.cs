@@ -22,6 +22,7 @@ internal static class LinearMotorEndpoints
         group.MapPost("/", LinearMotorHandlers.CreateAsync)
             .WithName("CreateLinearMotor")
             .Produces<LinearMotorDto>(StatusCodes.Status201Created)
+            .ProducesProblem(StatusCodes.Status500InternalServerError)
             .ProducesValidationProblem(StatusCodes.Status400BadRequest);
 
         group.MapPut("/{id:int}", LinearMotorHandlers.PutAsync)

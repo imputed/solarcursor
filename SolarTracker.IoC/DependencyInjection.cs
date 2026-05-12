@@ -2,6 +2,7 @@ using System.Runtime.InteropServices;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using SolarTracker.IoC.Configuration;
 using SolarTracker.Application.Interfaces.Calculators;
 using SolarTracker.Application.Interfaces.Hardware;
 using SolarTracker.Application.Interfaces.QueryHandlers;
@@ -26,8 +27,9 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("SolarTracker")
-            ?? "Data Source=solartracker.db";
+        string? connectionString = configuration.GetConnectionString("SolarTracker");
+        if (string.IsNullOrWhiteSpace(connectionString))
+            throw new InvalidOperationException(IoCTextCatalog.MissingSolarTrackerConnectionString());
 
         services.AddDbContext<SolarTrackerDbContext>(options =>
             options.UseSqlite(connectionString));

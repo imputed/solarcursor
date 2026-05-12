@@ -1,11 +1,15 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.Extensions.Logging;
 using SolarTracker.Application.Analysis;
 using SolarTracker.Application.Dtos;
 using SolarTracker.Application.Interfaces.QueryHandlers;
 using SolarTracker.Application.Interfaces.Services;
 using SolarTracker.Application.Mapping;
+using SolarTracker.Api.Errors;
 using SolarTracker.Api.Infrastructure;
+using SolarTracker.Api.Logging;
+using SolarTracker.Api.Routing;
 using SolarTracker.Domain.Entities;
 
 namespace SolarTracker.Api.Endpoints.InstallationSites;
@@ -36,11 +40,12 @@ internal static class InstallationSiteHandlers
         return entity is null ? TypedResults.NotFound() : TypedResults.Ok(InstallationSiteMapping.ToDto(entity));
     }
 
-    internal static async Task<Results<Created<InstallationSiteDto>, ValidationProblem>> CreateAsync(
+    internal static async Task<Results<Created<InstallationSiteDto>, ValidationProblem, ProblemHttpResult>> CreateAsync(
         CreateInstallationSiteDto dto,
         IValidator<CreateInstallationSiteDto> validator,
         IInstallationSiteService service,
         IInstallationSiteQueryHandler queryHandler,
+        ILoggerFactory loggerFactory,
         CancellationToken cancellationToken)
     {
         FluentValidation.Results.ValidationResult validation = await validator.ValidateAsync(dto, cancellationToken);
@@ -51,10 +56,16 @@ internal static class InstallationSiteHandlers
         InstallationSite? created = await queryHandler.GetByIdAsync(newId, cancellationToken);
         if (created is null)
         {
-            return TypedResults.ValidationProblem(new Dictionary<string, string[]> { ["_"] = ["Entity was not persisted."] });
+            ILogger logger = loggerFactory.CreateLogger(typeof(InstallationSiteHandlers).FullName!);
+            ApiLog.CreatePersistenceReadFailed(logger, ApiProblemCatalog.InstallationSiteEntityName, newId);
+            var problem = ApiProblemCatalog.InstallationSitePersistenceFailed(newId);
+            return TypedResults.Problem(
+                title: problem.Title,
+                detail: problem.Detail,
+                statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return TypedResults.Created($"/api/installation-sites/{newId}", InstallationSiteMapping.ToDto(created));
+        return TypedResults.Created(ApiRouteCatalog.InstallationSiteById(newId), InstallationSiteMapping.ToDto(created));
     }
 
     internal static async Task<Results<NoContent, NotFound, ValidationProblem>> PutAsync(
@@ -66,9 +77,7 @@ internal static class InstallationSiteHandlers
         CancellationToken cancellationToken)
     {
         if (id != dto.Id)
-        {
-            return TypedResults.ValidationProblem(new Dictionary<string, string[]> { ["id"] = ["Route id must equal body Id."] });
-        }
+            return TypedResults.ValidationProblem(ApiProblemCatalog.RouteIdMustEqualBodyId());
 
         FluentValidation.Results.ValidationResult validation = await validator.ValidateAsync(dto, cancellationToken);
         if (!validation.IsValid)

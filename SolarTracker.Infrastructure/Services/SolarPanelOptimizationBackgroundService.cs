@@ -6,6 +6,7 @@ using SolarTracker.Application.Interfaces.Repositories;
 using SolarTracker.Application.Interfaces.Services;
 using SolarTracker.Application.Results;
 using SolarTracker.Domain.Entities;
+using SolarTracker.Infrastructure.Logging;
 
 namespace SolarTracker.Infrastructure.Services;
 
@@ -42,11 +43,7 @@ public sealed class SolarPanelOptimizationBackgroundService(
                         continue;
 
                     ResultError error = result.Error!.Value;
-                    logger.LogWarning(
-                        "Automatic optimization failed for solar panel {SolarPanelId}. {Code}: {Message}",
-                        solarPanelId,
-                        error.Code,
-                        error.Message);
+                    InfrastructureLog.AutomaticOptimizationFailed(logger, solarPanelId, error.Code, error.Message);
                 }
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
@@ -55,7 +52,7 @@ public sealed class SolarPanelOptimizationBackgroundService(
             }
             catch (Exception exception)
             {
-                logger.LogError(exception, "Automatic solar panel optimization loop failed.");
+                InfrastructureLog.AutomaticOptimizationLoopFailed(logger, exception);
             }
 
             try

@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using SolarTracker.Application.Dtos;
 using SolarTracker.Application.Interfaces.Repositories;
@@ -18,7 +19,7 @@ public sealed class CurrentMeasuringUnitServiceUnitTests
             .Callback<CurrentMeasuringUnit, CancellationToken>((entity, _) => entity.Id = 17)
             .Returns(ValueTask.CompletedTask);
 
-        CurrentMeasuringUnitService service = new(repository.Object);
+        CurrentMeasuringUnitService service = new(repository.Object, NullLogger<CurrentMeasuringUnitService>.Instance);
         CreateCurrentMeasuringUnitDto dto = new(5, "Current sensor", 21);
 
         // Act
@@ -45,7 +46,7 @@ public sealed class CurrentMeasuringUnitServiceUnitTests
         repository.Setup(x => x.UpdateAsync(It.IsAny<CurrentMeasuringUnit>(), cancellationToken))
             .Returns(ValueTask.CompletedTask);
 
-        CurrentMeasuringUnitService service = new(repository.Object);
+        CurrentMeasuringUnitService service = new(repository.Object, NullLogger<CurrentMeasuringUnitService>.Instance);
         UpdateCurrentMeasuringUnitDto dto = new(13, 5, "Updated sensor", 22);
 
         // Act
@@ -72,7 +73,7 @@ public sealed class CurrentMeasuringUnitServiceUnitTests
         repository.Setup(x => x.DeleteAsync(13, cancellationToken))
             .Returns(ValueTask.CompletedTask);
 
-        CurrentMeasuringUnitService service = new(repository.Object);
+        CurrentMeasuringUnitService service = new(repository.Object, NullLogger<CurrentMeasuringUnitService>.Instance);
 
         // Act
         await service.DeleteAsync(13, cancellationToken);

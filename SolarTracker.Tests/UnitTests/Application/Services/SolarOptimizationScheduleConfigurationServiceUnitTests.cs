@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using SolarTracker.Application.Dtos;
 using SolarTracker.Application.Interfaces.Repositories;
@@ -20,7 +21,8 @@ public sealed class SolarOptimizationScheduleConfigurationServiceUnitTests
                 IntervalMinutes = 15,
             }));
 
-        SolarOptimizationScheduleConfigurationService service = new(repository.Object);
+        SolarOptimizationScheduleConfigurationService service =
+            new(repository.Object, NullLogger<SolarOptimizationScheduleConfigurationService>.Instance);
 
         // Act
         SolarOptimizationScheduleConfigurationDto result = await service.GetAsync(cancellationToken);
@@ -45,7 +47,8 @@ public sealed class SolarOptimizationScheduleConfigurationServiceUnitTests
                 IntervalMinutes = 20,
             }));
 
-        SolarOptimizationScheduleConfigurationService service = new(repository.Object);
+        SolarOptimizationScheduleConfigurationService service =
+            new(repository.Object, NullLogger<SolarOptimizationScheduleConfigurationService>.Instance);
         UpdateSolarOptimizationScheduleConfigurationDto dto = new(20);
 
         // Act

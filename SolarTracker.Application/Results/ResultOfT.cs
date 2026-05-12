@@ -29,10 +29,24 @@ public readonly record struct Result<T> where T : notnull
             Error = new ResultError(code, message),
         };
 
+    public static Result<T> NotFound(ResultError error) =>
+        new()
+        {
+            Status = ResultStatus.NotFound,
+            Error = error,
+        };
+
     public static Result<T> Failure(string code, string message) =>
         new()
         {
             Status = ResultStatus.Failure,
             Error = new ResultError(code, message),
+        };
+
+    public static Result<T> Failure(ResultError error) =>
+        new()
+        {
+            Status = ResultStatus.Failure,
+            Error = error,
         };
 }

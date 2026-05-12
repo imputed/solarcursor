@@ -19,10 +19,24 @@ public readonly record struct Result
             Error = new ResultError(code, message),
         };
 
+    public static Result NotFound(ResultError error) =>
+        new()
+        {
+            Status = ResultStatus.NotFound,
+            Error = error,
+        };
+
     public static Result Failure(string code, string message) =>
         new()
         {
             Status = ResultStatus.Failure,
             Error = new ResultError(code, message),
+        };
+
+    public static Result Failure(ResultError error) =>
+        new()
+        {
+            Status = ResultStatus.Failure,
+            Error = error,
         };
 }

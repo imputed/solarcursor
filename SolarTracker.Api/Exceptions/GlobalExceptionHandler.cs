@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using SolarTracker.Api.Errors;
+using SolarTracker.Api.Logging;
 
 namespace SolarTracker.Api.Exceptions;
 
@@ -12,13 +14,13 @@ internal sealed class GlobalExceptionHandler(
         Exception exception,
         CancellationToken cancellationToken)
     {
-        logger.LogError(exception, "Unhandled exception.");
+        ApiLog.UnhandledException(logger, exception);
 
         ProblemDetails problem = new()
         {
             Status = StatusCodes.Status500InternalServerError,
-            Title = "Server error",
-            Type = "https://httpstatuses.com/500",
+            Title = ApiProblemCatalog.ServerErrorTitleText(),
+            Type = ApiProblemCatalog.ServerErrorTypeUri(),
             Detail = environment.IsDevelopment() ? exception.ToString() : null,
         };
 

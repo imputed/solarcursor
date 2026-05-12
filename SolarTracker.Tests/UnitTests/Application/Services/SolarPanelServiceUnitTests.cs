@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using SolarTracker.Application.Dtos;
 using SolarTracker.Application.Interfaces.Calculators;
@@ -21,7 +22,8 @@ public sealed class SolarPanelServiceUnitTests
             .Callback<SolarPanel, CancellationToken>((entity, _) => entity.Id = 44)
             .Returns(ValueTask.CompletedTask);
 
-        SolarPanelService service = new(repository.Object, solarPanelCalculator.Object);
+        SolarPanelService service =
+            new(repository.Object, solarPanelCalculator.Object, NullLogger<SolarPanelService>.Instance);
         CreateSolarPanelDto dto = new(12, "panel-44");
 
         // Act
@@ -52,7 +54,8 @@ public sealed class SolarPanelServiceUnitTests
         repository.Setup(x => x.UpdateAsync(It.IsAny<SolarPanel>(), cancellationToken))
             .Returns(ValueTask.CompletedTask);
 
-        SolarPanelService service = new(repository.Object, solarPanelCalculator.Object);
+        SolarPanelService service =
+            new(repository.Object, solarPanelCalculator.Object, NullLogger<SolarPanelService>.Instance);
         UpdateSolarPanelDto dto = new(44, 12, "panel-44-updated");
 
         // Act
@@ -82,7 +85,8 @@ public sealed class SolarPanelServiceUnitTests
         solarPanelCalculator.Setup(x => x.GetCurrentPositionAsync(12, cancellationToken))
             .Returns(ValueTask.FromResult(expected));
 
-        SolarPanelService service = new(repository.Object, solarPanelCalculator.Object);
+        SolarPanelService service =
+            new(repository.Object, solarPanelCalculator.Object, NullLogger<SolarPanelService>.Instance);
 
         // Act
         Result<SolarPanelCurrentPositionDto> result = await service.GetCurrentPositionAsync(12, cancellationToken);
@@ -103,7 +107,8 @@ public sealed class SolarPanelServiceUnitTests
         solarPanelCalculator.Setup(x => x.MoveToOptimumAsync(12, cancellationToken))
             .Returns(ValueTask.FromResult(expected));
 
-        SolarPanelService service = new(repository.Object, solarPanelCalculator.Object);
+        SolarPanelService service =
+            new(repository.Object, solarPanelCalculator.Object, NullLogger<SolarPanelService>.Instance);
 
         // Act
         Result<SolarPanelCurrentPositionDto> result = await service.MoveToOptimumAsync(12, cancellationToken);
@@ -122,7 +127,8 @@ public sealed class SolarPanelServiceUnitTests
         repository.Setup(x => x.DeleteAsync(44, cancellationToken))
             .Returns(ValueTask.CompletedTask);
 
-        SolarPanelService service = new(repository.Object, solarPanelCalculator.Object);
+        SolarPanelService service =
+            new(repository.Object, solarPanelCalculator.Object, NullLogger<SolarPanelService>.Instance);
 
         // Act
         await service.DeleteAsync(44, cancellationToken);

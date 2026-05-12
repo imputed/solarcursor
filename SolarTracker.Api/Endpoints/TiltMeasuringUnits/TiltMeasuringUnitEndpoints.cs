@@ -22,6 +22,7 @@ internal static class TiltMeasuringUnitEndpoints
         group.MapPost("/", TiltMeasuringUnitHandlers.CreateAsync)
             .WithName("CreateTiltMeasuringUnit")
             .Produces<TiltMeasuringUnitDto>(StatusCodes.Status201Created)
+            .ProducesProblem(StatusCodes.Status500InternalServerError)
             .ProducesValidationProblem(StatusCodes.Status400BadRequest);
 
         group.MapPut("/{id:int}", TiltMeasuringUnitHandlers.PutAsync)

@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using SolarTracker.Application.Dtos;
 using SolarTracker.Application.Interfaces.Repositories;
@@ -18,7 +19,7 @@ public sealed class InstallationSiteServiceUnitTests
             .Callback<InstallationSite, CancellationToken>((entity, _) => entity.Id = 42)
             .Returns(ValueTask.CompletedTask);
 
-        InstallationSiteService service = new(repository.Object);
+        InstallationSiteService service = new(repository.Object, NullLogger<InstallationSiteService>.Instance);
         CreateInstallationSiteDto dto = new("Primary site", 50.1m, 8.6m);
 
         // Act
@@ -46,7 +47,7 @@ public sealed class InstallationSiteServiceUnitTests
         repository.Setup(x => x.UpdateAsync(It.IsAny<InstallationSite>(), cancellationToken))
             .Returns(ValueTask.CompletedTask);
 
-        InstallationSiteService service = new(repository.Object);
+        InstallationSiteService service = new(repository.Object, NullLogger<InstallationSiteService>.Instance);
         UpdateInstallationSiteDto dto = new(7, "Updated site", 49.2m, 9.4m);
 
         // Act
@@ -74,7 +75,7 @@ public sealed class InstallationSiteServiceUnitTests
         repository.Setup(x => x.DeleteAsync(9, cancellationToken))
             .Returns(ValueTask.CompletedTask);
 
-        InstallationSiteService service = new(repository.Object);
+        InstallationSiteService service = new(repository.Object, NullLogger<InstallationSiteService>.Instance);
 
         // Act
         await service.DeleteAsync(9, cancellationToken);

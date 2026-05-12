@@ -1,6 +1,7 @@
 using System.Device.Gpio;
 using Microsoft.Extensions.Logging;
 using SolarTracker.Application.Interfaces.Hardware;
+using SolarTracker.Infrastructure.Logging;
 
 namespace SolarTracker.Infrastructure.Hardware;
 
@@ -27,8 +28,8 @@ public sealed class RaspberryPiLinearMotorActuator(ILogger<RaspberryPiLinearMoto
         controller.Write(inactivePin, PinValue.Low);
         controller.Write(activePin, PinValue.Low);
 
-        logger.LogInformation(
-            "{Direction} for linear motor {LinearMotorId} at site {InstallationSiteId} using pin {ActivePin} for {DurationMs} ms.",
+        InfrastructureLog.DrivingLinearMotor(
+            logger,
             direction,
             context.LinearMotorId,
             context.InstallationSiteId,

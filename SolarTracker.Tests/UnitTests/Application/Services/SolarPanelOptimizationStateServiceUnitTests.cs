@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using SolarTracker.Application.Dtos;
 using SolarTracker.Application.Interfaces.QueryHandlers;
@@ -19,7 +20,8 @@ public sealed class SolarPanelOptimizationStateServiceUnitTests
         solarPanelQueryHandler.Setup(x => x.GetByIdAsync(9, cancellationToken))
             .Returns(ValueTask.FromResult<SolarPanel?>(null));
 
-        SolarPanelOptimizationStateService service = new(repository.Object, solarPanelQueryHandler.Object);
+        SolarPanelOptimizationStateService service =
+            new(repository.Object, solarPanelQueryHandler.Object, NullLogger<SolarPanelOptimizationStateService>.Instance);
 
         // Act
         var result = await service.GetAsync(9, cancellationToken);
@@ -46,7 +48,8 @@ public sealed class SolarPanelOptimizationStateServiceUnitTests
                 IsEnabled = true,
             }));
 
-        SolarPanelOptimizationStateService service = new(repository.Object, solarPanelQueryHandler.Object);
+        SolarPanelOptimizationStateService service =
+            new(repository.Object, solarPanelQueryHandler.Object, NullLogger<SolarPanelOptimizationStateService>.Instance);
 
         // Act
         var result = await service.GetAsync(9, cancellationToken);
@@ -66,7 +69,8 @@ public sealed class SolarPanelOptimizationStateServiceUnitTests
         solarPanelQueryHandler.Setup(x => x.GetByIdAsync(9, cancellationToken))
             .Returns(ValueTask.FromResult<SolarPanel?>(null));
 
-        SolarPanelOptimizationStateService service = new(repository.Object, solarPanelQueryHandler.Object);
+        SolarPanelOptimizationStateService service =
+            new(repository.Object, solarPanelQueryHandler.Object, NullLogger<SolarPanelOptimizationStateService>.Instance);
 
         // Act
         var result = await service.UpdateAsync(9, new UpdateSolarPanelOptimizationStateDto(true), cancellationToken);
@@ -96,7 +100,8 @@ public sealed class SolarPanelOptimizationStateServiceUnitTests
                 IsEnabled = true,
             }));
 
-        SolarPanelOptimizationStateService service = new(repository.Object, solarPanelQueryHandler.Object);
+        SolarPanelOptimizationStateService service =
+            new(repository.Object, solarPanelQueryHandler.Object, NullLogger<SolarPanelOptimizationStateService>.Instance);
 
         // Act
         var result = await service.UpdateAsync(9, new UpdateSolarPanelOptimizationStateDto(true), cancellationToken);

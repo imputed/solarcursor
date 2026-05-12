@@ -33,6 +33,7 @@ internal static class SolarPanelEndpoints
         group.MapPost("/", SolarPanelHandlers.CreateAsync)
             .WithName("CreateSolarPanel")
             .Produces<SolarPanelDto>(StatusCodes.Status201Created)
+            .ProducesProblem(StatusCodes.Status500InternalServerError)
             .ProducesValidationProblem(StatusCodes.Status400BadRequest);
 
         group.MapPut("/{id:int}", SolarPanelHandlers.PutAsync)

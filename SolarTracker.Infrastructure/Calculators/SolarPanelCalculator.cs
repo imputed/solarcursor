@@ -1,6 +1,7 @@
 using Innovative.Geometry;
 using Innovative.SolarCalculator;
 using Microsoft.Extensions.Logging;
+using SolarTracker.Application.Errors;
 using SolarTracker.Application.Dtos;
 using SolarTracker.Application.Interfaces.Calculators;
 using SolarTracker.Application.Interfaces.QueryHandlers;
@@ -9,6 +10,7 @@ using SolarTracker.Application.Results;
 using SolarTracker.Domain.Abstractions;
 using SolarTracker.Domain.Entities;
 using SolarTracker.Domain.ValueObjects;
+using SolarTracker.Infrastructure.Logging;
 using SolarTracker.Infrastructure.Services;
 
 namespace SolarTracker.Infrastructure.Calculators;
@@ -57,6 +59,7 @@ public sealed class SolarPanelCalculator(
                 return Result<SolarPanelCurrentPositionDto>.Success(currentState);
 
             bool moveUp = delta > 0d;
+            List<int> movedMotorIds = [];
 
             foreach (LinearMotor linearMotor in context.SolarPanel.LinearMotors.OrderBy(motor => motor.Id))
             {
@@ -71,24 +74,25 @@ public sealed class SolarPanelCalculator(
                         cancellationToken);
 
                 if (!moveResult.IsSuccess)
-                {
-                    ResultError error = moveResult.Error!.Value;
-                    return moveResult.IsNotFound
-                        ? Result<SolarPanelCurrentPositionDto>.NotFound(error.Code, error.Message)
-                        : Result<SolarPanelCurrentPositionDto>.Failure(error.Code, error.Message);
-                }
+                    return await HandleMovementFailureAsync(
+                        solarPanelId,
+                        movedMotorIds,
+                        moveUp,
+                        context.Configuration.StepDurationMs,
+                        linearMotor.Id,
+                        moveResult,
+                        cancellationToken);
+
+                movedMotorIds.Add(linearMotor.Id);
             }
 
             currentState = await CreateCurrentPositionDtoAsync(context, cancellationToken);
         }
 
-        logger.LogWarning(
-            "MoveToOptimum reached the configured maximum step count for solar panel {SolarPanelId}.",
-            solarPanelId);
+        InfrastructureLog.MoveToOptimumMaxStepsReached(logger, solarPanelId);
 
         return Result<SolarPanelCurrentPositionDto>.Failure(
-            "solar-panel-threshold-not-met",
-            $"Solar panel {solarPanelId} did not reach the configured threshold in the allowed number of steps.");
+            SolarTrackerErrorCatalog.SolarPanel.ThresholdNotMet(solarPanelId));
     }
 
     private async ValueTask<Result<SolarPanelCalculationContext>> BuildContextAsync(
@@ -97,26 +101,21 @@ public sealed class SolarPanelCalculator(
     {
         SolarPanel? solarPanel = await solarPanelQueryHandler.GetByIdAsync(solarPanelId, cancellationToken);
         if (solarPanel is null)
-            return Result<SolarPanelCalculationContext>.NotFound(
-                "solar-panel-not-found",
-                $"Solar panel {solarPanelId} was not found.");
+            return Result<SolarPanelCalculationContext>.NotFound(SolarTrackerErrorCatalog.SolarPanel.NotFound(solarPanelId));
 
         if (solarPanel.TiltMeasuringUnit is null)
             return Result<SolarPanelCalculationContext>.Failure(
-                "tilt-measuring-unit-missing",
-                $"Solar panel {solarPanelId} does not have a tilt measuring unit.");
+                SolarTrackerErrorCatalog.SolarPanel.TiltMeasuringUnitMissing(solarPanelId));
 
         if (solarPanel.LinearMotors.Count == 0)
             return Result<SolarPanelCalculationContext>.Failure(
-                "linear-motors-missing",
-                $"Solar panel {solarPanelId} does not have any linear motors.");
+                SolarTrackerErrorCatalog.SolarPanel.LinearMotorsMissing(solarPanelId));
 
         InstallationSite? installationSite =
             await installationSiteQueryHandler.GetByIdAsync(solarPanel.InstallationSiteId, cancellationToken);
         if (installationSite is null)
             return Result<SolarPanelCalculationContext>.NotFound(
-                "installation-site-not-found",
-                $"Installation site {solarPanel.InstallationSiteId} was not found.");
+                SolarTrackerErrorCatalog.InstallationSite.NotFound(solarPanel.InstallationSiteId));
 
         SolarTrackingConfiguration configuration =
             await configurationRepository.GetBySolarPanelIdAsync(solarPanelId, cancellationToken);
@@ -146,5 +145,66 @@ public sealed class SolarPanelCalculator(
         DateTimeOffset now = timeProvider.GetUtcNow();
         SolarTimes solarTimes = new(now, new Angle(latitude), new Angle(longitude));
         return Math.Clamp((double)solarTimes.SolarZenith, 0d, 90d);
+    }
+
+    private async ValueTask<Result<SolarPanelCurrentPositionDto>> HandleMovementFailureAsync(
+        int solarPanelId,
+        IReadOnlyList<int> movedMotorIds,
+        bool moveUp,
+        int durationMs,
+        int failedLinearMotorId,
+        Result moveResult,
+        CancellationToken cancellationToken)
+    {
+        ResultError moveError = moveResult.Error!.Value;
+        if (movedMotorIds.Count == 0)
+            return moveResult.IsNotFound
+                ? Result<SolarPanelCurrentPositionDto>.NotFound(moveError.Code, moveError.Message)
+                : Result<SolarPanelCurrentPositionDto>.Failure(moveError.Code, moveError.Message);
+
+        InfrastructureLog.RecoveringSolarPanelMovement(
+            logger,
+            solarPanelId,
+            failedLinearMotorId,
+            moveError.Code,
+            moveError.Message);
+
+        Result recoveryResult = await RecoverStepAsync(movedMotorIds, moveUp, durationMs, cancellationToken);
+        if (!recoveryResult.IsSuccess)
+        {
+            ResultError recoveryError = recoveryResult.Error!.Value;
+            return Result<SolarPanelCurrentPositionDto>.Failure(
+                SolarTrackerErrorCatalog.SolarPanel.MovementRecoveryFailed(
+                    solarPanelId,
+                    failedLinearMotorId,
+                    moveError,
+                    recoveryError));
+        }
+
+        return Result<SolarPanelCurrentPositionDto>.Failure(
+            SolarTrackerErrorCatalog.SolarPanel.MovementStepReverted(solarPanelId, failedLinearMotorId, moveError));
+    }
+
+    private async ValueTask<Result> RecoverStepAsync(
+        IReadOnlyList<int> movedMotorIds,
+        bool moveUp,
+        int durationMs,
+        CancellationToken cancellationToken)
+    {
+        for (int index = movedMotorIds.Count - 1; index >= 0; index--)
+        {
+            int motorId = movedMotorIds[index];
+            Result recoveryResult = moveUp
+                ? await linearMotorMovementService.MoveDownAsync(motorId, durationMs, cancellationToken)
+                : await linearMotorMovementService.MoveUpAsync(motorId, durationMs, cancellationToken);
+
+            if (!recoveryResult.IsSuccess)
+            {
+                ResultError error = recoveryResult.Error!.Value;
+                return Result.Failure(SolarTrackerErrorCatalog.LinearMotor.RecoveryFailed(motorId, error));
+            }
+        }
+
+        return Result.Success();
     }
 }

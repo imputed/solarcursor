@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using SolarTracker.Application.Dtos;
 using SolarTracker.Application.Interfaces.Repositories;
@@ -18,7 +19,7 @@ public sealed class LinearMotorServiceUnitTests
             .Callback<LinearMotor, CancellationToken>((entity, _) => entity.Id = 23)
             .Returns(ValueTask.CompletedTask);
 
-        LinearMotorService service = new(repository.Object);
+        LinearMotorService service = new(repository.Object, NullLogger<LinearMotorService>.Instance);
         CreateLinearMotorDto dto = new(8, "Motor A", 17, 18);
 
         // Act
@@ -46,7 +47,7 @@ public sealed class LinearMotorServiceUnitTests
         repository.Setup(x => x.UpdateAsync(It.IsAny<LinearMotor>(), cancellationToken))
             .Returns(ValueTask.CompletedTask);
 
-        LinearMotorService service = new(repository.Object);
+        LinearMotorService service = new(repository.Object, NullLogger<LinearMotorService>.Instance);
         UpdateLinearMotorDto dto = new(23, 8, "Motor B", 19, 20);
 
         // Act
@@ -74,7 +75,7 @@ public sealed class LinearMotorServiceUnitTests
         repository.Setup(x => x.DeleteAsync(23, cancellationToken))
             .Returns(ValueTask.CompletedTask);
 
-        LinearMotorService service = new(repository.Object);
+        LinearMotorService service = new(repository.Object, NullLogger<LinearMotorService>.Instance);
 
         // Act
         await service.DeleteAsync(23, cancellationToken);

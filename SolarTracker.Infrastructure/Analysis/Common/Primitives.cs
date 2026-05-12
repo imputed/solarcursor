@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using SolarTracker.Application.Analysis;
+using SolarTracker.Infrastructure.Errors;
 
 namespace SolarTracker.Infrastructure.Analysis.Common;
 
@@ -16,7 +17,7 @@ internal static class Primitives
             ScalarComparisonOperator.GreaterThanOrEqual => Expression.GreaterThanOrEqual(property, rhs),
             ScalarComparisonOperator.LessThan => Expression.LessThan(property, rhs),
             ScalarComparisonOperator.LessThanOrEqual => Expression.LessThanOrEqual(property, rhs),
-            _ => throw new NotSupportedException($"Operator {op} is not supported for integer fields."),
+            _ => throw new NotSupportedException(InfrastructureTextCatalog.UnsupportedIntegerOperator(op)),
         };
     }
 
@@ -40,7 +41,7 @@ internal static class Primitives
                 Expression.AndAlso(
                     Expression.NotEqual(property, Expression.Constant(null, property.Type)),
                     Expression.Call(property, nameof(string.StartsWith), Type.EmptyTypes, valueExpr)),
-            _ => throw new NotSupportedException($"Operator {op} is not supported for string fields."),
+            _ => throw new NotSupportedException(InfrastructureTextCatalog.UnsupportedStringOperator(op)),
         };
     }
 }

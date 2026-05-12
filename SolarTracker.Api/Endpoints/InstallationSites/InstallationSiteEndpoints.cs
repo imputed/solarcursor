@@ -22,6 +22,7 @@ internal static class InstallationSiteEndpoints
         group.MapPost("/", InstallationSiteHandlers.CreateAsync)
             .WithName("CreateInstallationSite")
             .Produces<InstallationSiteDto>(StatusCodes.Status201Created)
+            .ProducesProblem(StatusCodes.Status500InternalServerError)
             .ProducesValidationProblem(StatusCodes.Status400BadRequest);
 
         group.MapPut("/{id:int}", InstallationSiteHandlers.PutAsync)

@@ -37,6 +37,20 @@ public sealed class ResultUnitTests
     }
 
     [Fact]
+    public void NotFound_ShouldUseProvidedResultError_WhenCalledWithResultError()
+    {
+        // Arrange
+        ResultError error = new("solar-panel-not-found", "Solar panel 7 was not found.");
+
+        // Act
+        Result result = Result.NotFound(error);
+
+        // Assert
+        Assert.Equal(ResultStatus.NotFound, result.Status);
+        Assert.Equal(error, result.Error);
+    }
+
+    [Fact]
     public void Failure_ShouldReturnFailureStatusAndError_WhenCalled()
     {
         // Arrange
@@ -51,5 +65,19 @@ public sealed class ResultUnitTests
         Assert.False(result.IsSuccess);
         Assert.False(result.IsNotFound);
         Assert.Equal(new ResultError(code, message), result.Error);
+    }
+
+    [Fact]
+    public void Failure_ShouldUseProvidedResultError_WhenCalledWithResultError()
+    {
+        // Arrange
+        ResultError error = new("movement-failed", "The motor movement could not be completed.");
+
+        // Act
+        Result result = Result.Failure(error);
+
+        // Assert
+        Assert.Equal(ResultStatus.Failure, result.Status);
+        Assert.Equal(error, result.Error);
     }
 }

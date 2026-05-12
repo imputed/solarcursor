@@ -39,6 +39,21 @@ public sealed class ResultOfTUnitTests
     }
 
     [Fact]
+    public void NotFound_ShouldUseProvidedResultError_WhenCalledWithResultError()
+    {
+        // Arrange
+        ResultError error = new("installation-site-not-found", "Installation site 3 was not found.");
+
+        // Act
+        Result<string> result = Result<string>.NotFound(error);
+
+        // Assert
+        Assert.Equal(ResultStatus.NotFound, result.Status);
+        Assert.Null(result.Value);
+        Assert.Equal(error, result.Error);
+    }
+
+    [Fact]
     public void Failure_ShouldReturnErrorWithoutValue_WhenCalled()
     {
         // Arrange
@@ -54,5 +69,20 @@ public sealed class ResultOfTUnitTests
         Assert.False(result.IsNotFound);
         Assert.Null(result.Value);
         Assert.Equal(new ResultError(code, message), result.Error);
+    }
+
+    [Fact]
+    public void Failure_ShouldUseProvidedResultError_WhenCalledWithResultError()
+    {
+        // Arrange
+        ResultError error = new("validation-failed", "The input was invalid.");
+
+        // Act
+        Result<string> result = Result<string>.Failure(error);
+
+        // Assert
+        Assert.Equal(ResultStatus.Failure, result.Status);
+        Assert.Null(result.Value);
+        Assert.Equal(error, result.Error);
     }
 }

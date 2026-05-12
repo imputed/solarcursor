@@ -22,6 +22,7 @@ internal static class CurrentMeasuringUnitEndpoints
         group.MapPost("/", CurrentMeasuringUnitHandlers.CreateAsync)
             .WithName("CreateCurrentMeasuringUnit")
             .Produces<CurrentMeasuringUnitDto>(StatusCodes.Status201Created)
+            .ProducesProblem(StatusCodes.Status500InternalServerError)
             .ProducesValidationProblem(StatusCodes.Status400BadRequest);
 
         group.MapPut("/{id:int}", CurrentMeasuringUnitHandlers.PutAsync)

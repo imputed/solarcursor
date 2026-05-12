@@ -1,5 +1,6 @@
 using FluentValidation;
 using SolarTracker.Application.Analysis;
+using SolarTracker.Api.Validation;
 
 namespace SolarTracker.Api.Validation.Analyze;
 
@@ -13,7 +14,7 @@ public sealed class TiltMeasuringUnitAnalyzeRequestValidator : AbstractValidator
         RuleFor(r => r.Take).InclusiveBetween(1, 500);
         RuleFor(r => r.Skip).GreaterThanOrEqualTo(0);
         RuleFor(r => r.SortBy).Must(f => !f.HasValue || Enum.IsDefined(f.Value))
-            .WithMessage("SortBy must be a defined whitelisted field.");
+            .WithMessage(ValidationMessageCatalog.SortByMustBeDefinedWhitelistedField());
         RuleFor(r => r).Custom(ValidateGraph);
     }
 
@@ -28,7 +29,7 @@ public sealed class TiltMeasuringUnitAnalyzeRequestValidator : AbstractValidator
         if (leafCounter.Count > MaxLeafCount)
         {
             context.AddFailure(nameof(TiltMeasuringUnitAnalyzeRequest.Filter),
-                $"A maximum of {MaxLeafCount} predicate leaves is supported.");
+                ValidationMessageCatalog.MaximumPredicateLeavesSupported(MaxLeafCount));
         }
     }
 
@@ -44,7 +45,7 @@ public sealed class TiltMeasuringUnitAnalyzeRequestValidator : AbstractValidator
 
         if (depth > MaxDepth)
         {
-            context.AddFailure(path, $"Filter nesting must not exceed {MaxDepth} levels.");
+            context.AddFailure(path, ValidationMessageCatalog.FilterNestingMustNotExceed(MaxDepth));
             return;
         }
 
@@ -73,7 +74,7 @@ public sealed class TiltMeasuringUnitAnalyzeRequestValidator : AbstractValidator
     {
         if (items is null)
         {
-            context.AddFailure(itemsPath, $"{combiner}.items cannot be null.");
+            context.AddFailure(itemsPath, ValidationMessageCatalog.CombinerItemsCannotBeNull(combiner));
             return;
         }
 
@@ -95,7 +96,7 @@ public sealed class TiltMeasuringUnitAnalyzeRequestValidator : AbstractValidator
 
         if (!Enum.IsDefined(leaf.Field))
         {
-            context.AddFailure(path, "Predicate field must be defined on the whitelist.");
+            context.AddFailure(path, ValidationMessageCatalog.PredicateFieldMustBeDefinedOnWhitelist());
             return;
         }
 
@@ -110,7 +111,7 @@ public sealed class TiltMeasuringUnitAnalyzeRequestValidator : AbstractValidator
                 ValidateStringLeaf(leaf, context, path);
                 break;
             default:
-                context.AddFailure(path, $"Field '{leaf.Field}' is not a whitelisted root scalar.");
+                context.AddFailure(path, ValidationMessageCatalog.FieldNotWhitelistedRootScalar(leaf.Field));
                 break;
         }
     }
@@ -122,17 +123,17 @@ public sealed class TiltMeasuringUnitAnalyzeRequestValidator : AbstractValidator
     {
         if (leaf.IntValue is null)
         {
-            context.AddFailure(path, $"{nameof(leaf.IntValue)} is required for integer whitelist fields.");
+            context.AddFailure(path, ValidationMessageCatalog.ValueRequiredForIntegerWhitelistFields(nameof(leaf.IntValue)));
         }
 
         if (leaf.TextValue is not null)
         {
-            context.AddFailure(path, $"{nameof(leaf.TextValue)} must not be set for integer whitelist fields.");
+            context.AddFailure(path, ValidationMessageCatalog.ValueMustNotBeSetForIntegerWhitelistFields(nameof(leaf.TextValue)));
         }
 
         if (!AnalyzeOperatorRules.AllowsIntOperands(leaf.Operator))
         {
-            context.AddFailure(nameof(leaf.Operator), $"Operator '{leaf.Operator}' is not permitted for integer fields.");
+            context.AddFailure(nameof(leaf.Operator), ValidationMessageCatalog.OperatorNotPermittedForIntegerFields(leaf.Operator));
         }
     }
 
@@ -143,17 +144,17 @@ public sealed class TiltMeasuringUnitAnalyzeRequestValidator : AbstractValidator
     {
         if (leaf.TextValue is null)
         {
-            context.AddFailure(path, $"{nameof(leaf.TextValue)} is required when filtering string whitelist fields.");
+            context.AddFailure(path, ValidationMessageCatalog.ValueRequiredWhenFilteringStringWhitelistFields(nameof(leaf.TextValue)));
         }
 
         if (leaf.IntValue is not null)
         {
-            context.AddFailure(path, $"{nameof(leaf.IntValue)} must not be set for string whitelist fields.");
+            context.AddFailure(path, ValidationMessageCatalog.ValueMustNotBeSetForStringWhitelistFields(nameof(leaf.IntValue)));
         }
 
         if (!AnalyzeOperatorRules.AllowsStringOperands(leaf.Operator))
         {
-            context.AddFailure(nameof(leaf.Operator), $"Operator '{leaf.Operator}' is not permitted for string fields.");
+            context.AddFailure(nameof(leaf.Operator), ValidationMessageCatalog.OperatorNotPermittedForStringFields(leaf.Operator));
         }
     }
 

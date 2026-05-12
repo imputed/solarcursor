@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Moq;
 using SolarTracker.Application.Interfaces.Hardware;
 using SolarTracker.Application.Interfaces.QueryHandlers;
@@ -24,7 +25,8 @@ public sealed class LinearMotorMovementServiceUnitTests
             linearMotorQueryHandler.Object,
             solarPanelQueryHandler.Object,
             installationSiteQueryHandler.Object,
-            actuator.Object);
+            actuator.Object,
+            Mock.Of<ILogger<LinearMotorMovementService>>());
 
         // Act
         var result = await service.MoveUpAsync(4, 600, cancellationToken);
@@ -59,7 +61,8 @@ public sealed class LinearMotorMovementServiceUnitTests
             linearMotorQueryHandler.Object,
             solarPanelQueryHandler.Object,
             installationSiteQueryHandler.Object,
-            actuator.Object);
+            actuator.Object,
+            Mock.Of<ILogger<LinearMotorMovementService>>());
 
         // Act
         var result = await service.MoveUpAsync(4, 600, cancellationToken);
@@ -90,7 +93,8 @@ public sealed class LinearMotorMovementServiceUnitTests
             linearMotorQueryHandler.Object,
             solarPanelQueryHandler.Object,
             installationSiteQueryHandler.Object,
-            actuator.Object);
+            actuator.Object,
+            Mock.Of<ILogger<LinearMotorMovementService>>());
 
         // Act
         var result = await service.MoveDownAsync(4, 600, cancellationToken);
@@ -127,7 +131,8 @@ public sealed class LinearMotorMovementServiceUnitTests
             linearMotorQueryHandler.Object,
             solarPanelQueryHandler.Object,
             installationSiteQueryHandler.Object,
-            actuator.Object);
+            actuator.Object,
+            Mock.Of<ILogger<LinearMotorMovementService>>());
 
         // Act
         var result = await service.MoveUpAsync(4, 650, cancellationToken);
@@ -174,7 +179,8 @@ public sealed class LinearMotorMovementServiceUnitTests
             linearMotorQueryHandler.Object,
             solarPanelQueryHandler.Object,
             installationSiteQueryHandler.Object,
-            actuator.Object);
+            actuator.Object,
+            Mock.Of<ILogger<LinearMotorMovementService>>());
 
         // Act
         var result = await service.MoveDownAsync(4, 700, cancellationToken);

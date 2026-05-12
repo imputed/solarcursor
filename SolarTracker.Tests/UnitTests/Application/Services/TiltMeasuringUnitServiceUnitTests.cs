@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using SolarTracker.Application.Dtos;
 using SolarTracker.Application.Interfaces.Repositories;
@@ -18,7 +19,7 @@ public sealed class TiltMeasuringUnitServiceUnitTests
             .Callback<TiltMeasuringUnit, CancellationToken>((entity, _) => entity.Id = 31)
             .Returns(ValueTask.CompletedTask);
 
-        TiltMeasuringUnitService service = new(repository.Object);
+        TiltMeasuringUnitService service = new(repository.Object, NullLogger<TiltMeasuringUnitService>.Instance);
         CreateTiltMeasuringUnitDto dto = new(8, "Tilt sensor", 12);
 
         // Act
@@ -45,7 +46,7 @@ public sealed class TiltMeasuringUnitServiceUnitTests
         repository.Setup(x => x.UpdateAsync(It.IsAny<TiltMeasuringUnit>(), cancellationToken))
             .Returns(ValueTask.CompletedTask);
 
-        TiltMeasuringUnitService service = new(repository.Object);
+        TiltMeasuringUnitService service = new(repository.Object, NullLogger<TiltMeasuringUnitService>.Instance);
         UpdateTiltMeasuringUnitDto dto = new(31, 8, "Updated tilt sensor", 13);
 
         // Act
@@ -72,7 +73,7 @@ public sealed class TiltMeasuringUnitServiceUnitTests
         repository.Setup(x => x.DeleteAsync(31, cancellationToken))
             .Returns(ValueTask.CompletedTask);
 
-        TiltMeasuringUnitService service = new(repository.Object);
+        TiltMeasuringUnitService service = new(repository.Object, NullLogger<TiltMeasuringUnitService>.Instance);
 
         // Act
         await service.DeleteAsync(31, cancellationToken);

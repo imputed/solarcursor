@@ -7,7 +7,7 @@ alwaysApply: true
 
 - The solution must follow a strict layered architecture.
 - `SolarTracker.Domain` must not depend on any other project.
-- `SolarTracker.Application` may depend only on `SolarTracker.Domain`.
+- `SolarTracker.Application` may depend only on `SolarTracker.Domain`, except for `Microsoft.Extensions.Logging.Abstractions` when using framework logging abstractions.
 - `SolarTracker.Infrastructure` may depend only on `SolarTracker.Application` and `SolarTracker.Domain`.
 - `SolarTracker.Api` must expose transport concerns only and must not contain business logic or persistence logic.
 - `SolarTracker.IoC` is the composition root and owns the registration of concrete implementations.
@@ -17,6 +17,7 @@ alwaysApply: true
 - Do not bypass layer boundaries.
 - Do not access Entity Framework types outside `SolarTracker.Infrastructure`.
 - Do not place HTTP, GPIO, OpenAPI, or serialization concerns in `Domain` or `Application`.
+- In `SolarTracker.Application`, allow only logging abstractions and source-generated logging methods from `Microsoft.Extensions.Logging`; do not introduce other infrastructure concerns there.
 - Do not introduce mediator, event bus, or message-driven indirection unless a dedicated rule explicitly requires it.
 
 # Composition Rules

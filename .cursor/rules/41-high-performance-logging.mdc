@@ -1,0 +1,15 @@
+---
+description: High-performance .NET logging conventions
+globs: **/*.cs
+alwaysApply: false
+---
+
+# Logging
+
+- Prefer source-generated logging with `[LoggerMessage]` over ad-hoc `logger.Log...` calls.
+- Keep log definitions in static partial logging classes and call them from the surrounding code.
+- Use stable `EventId` values and do not reuse the same id for unrelated events.
+- Log warnings and errors for failures, conflicts, retries, or unexpected missing state.
+- Keep routine per-request noise at `Debug` unless the event is an important state change.
+- Do not log normal validation failures by default.
+- Pass structured values as method parameters instead of string interpolation.

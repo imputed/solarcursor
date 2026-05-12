@@ -1,12 +1,16 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.Extensions.Logging;
 using SolarTracker.Application.Analysis;
 using SolarTracker.Application.Dtos;
 using SolarTracker.Application.Interfaces.QueryHandlers;
 using SolarTracker.Application.Interfaces.Services;
 using SolarTracker.Application.Mapping;
 using SolarTracker.Application.Results;
+using SolarTracker.Api.Errors;
 using SolarTracker.Api.Infrastructure;
+using SolarTracker.Api.Logging;
+using SolarTracker.Api.Routing;
 using SolarTracker.Domain.Entities;
 
 namespace SolarTracker.Api.Endpoints.SolarPanels;
@@ -49,6 +53,7 @@ internal static class SolarPanelHandlers
     internal static async Task<Results<Ok<SolarPanelCurrentPositionDto>, NotFound, ProblemHttpResult>> MoveToOptimumAsync(
         int id,
         ISolarPanelService service,
+        ILoggerFactory loggerFactory,
         CancellationToken cancellationToken)
     {
         Result<SolarPanelCurrentPositionDto> result = await service.MoveToOptimumAsync(id, cancellationToken);
@@ -58,17 +63,22 @@ internal static class SolarPanelHandlers
         if (result.IsNotFound)
             return TypedResults.NotFound();
 
+        ResultError error = result.Error!.Value;
+        ILogger logger = loggerFactory.CreateLogger(typeof(SolarPanelHandlers).FullName!);
+        ApiLog.SolarPanelMoveToOptimumConflict(logger, id, error.Code, error.Message);
+        var problem = ApiProblemCatalog.SolarPanelMovementFailed(error.Message);
         return TypedResults.Problem(
-            title: "Solar panel movement failed",
-            detail: result.Error?.Message,
+            title: problem.Title,
+            detail: problem.Detail,
             statusCode: StatusCodes.Status409Conflict);
     }
 
-    internal static async Task<Results<Created<SolarPanelDto>, ValidationProblem>> CreateAsync(
+    internal static async Task<Results<Created<SolarPanelDto>, ValidationProblem, ProblemHttpResult>> CreateAsync(
         CreateSolarPanelDto dto,
         IValidator<CreateSolarPanelDto> validator,
         ISolarPanelService service,
         ISolarPanelQueryHandler queryHandler,
+        ILoggerFactory loggerFactory,
         CancellationToken cancellationToken)
     {
         FluentValidation.Results.ValidationResult validation = await validator.ValidateAsync(dto, cancellationToken);
@@ -79,10 +89,16 @@ internal static class SolarPanelHandlers
         SolarPanel? created = await queryHandler.GetByIdAsync(newId, cancellationToken);
         if (created is null)
         {
-            return TypedResults.ValidationProblem(new Dictionary<string, string[]> { ["_"] = ["Entity was not persisted."] });
+            ILogger logger = loggerFactory.CreateLogger(typeof(SolarPanelHandlers).FullName!);
+            ApiLog.CreatePersistenceReadFailed(logger, ApiProblemCatalog.SolarPanelEntityName, newId);
+            var problem = ApiProblemCatalog.SolarPanelPersistenceFailed(newId);
+            return TypedResults.Problem(
+                title: problem.Title,
+                detail: problem.Detail,
+                statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return TypedResults.Created($"/api/solar-panels/{newId}", SolarPanelMapping.ToDto(created));
+        return TypedResults.Created(ApiRouteCatalog.SolarPanelById(newId), SolarPanelMapping.ToDto(created));
     }
 
     internal static async Task<Results<NoContent, NotFound, ValidationProblem>> PutAsync(
@@ -94,9 +110,7 @@ internal static class SolarPanelHandlers
         CancellationToken cancellationToken)
     {
         if (id != dto.Id)
-        {
-            return TypedResults.ValidationProblem(new Dictionary<string, string[]> { ["id"] = ["Route id must equal body Id."] });
-        }
+            return TypedResults.ValidationProblem(ApiProblemCatalog.RouteIdMustEqualBodyId());
 
         FluentValidation.Results.ValidationResult validation = await validator.ValidateAsync(dto, cancellationToken);
         if (!validation.IsValid)
