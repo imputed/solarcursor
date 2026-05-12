@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using SolarTracker.Application.Analysis;
+using SolarTracker.Application.Analysis.LinearMotor;
 using SolarTracker.Application.Interfaces.QueryHandlers;
 using SolarTracker.Infrastructure.Analysis.LinearMotor;
 using SolarTracker.Infrastructure.Persistence;

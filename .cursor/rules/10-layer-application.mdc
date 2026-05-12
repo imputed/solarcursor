@@ -11,14 +11,16 @@ alwaysApply: false
 
 # Services
 
-- Services exist for write use cases only.
-- Services may implement `AddAsync`, `UpdateAsync`, and `DeleteAsync`.
-- Services must not expose `GetByIdAsync`, `ListAsync`, or `AnalyzeAsync`.
+- Services own application use-case orchestration and may handle focused configuration or state reads when a dedicated query handler would add little value.
+- Services may implement `AddAsync`, `UpdateAsync`, and `DeleteAsync`, followed by other focused methods such as `Optimize` or `GetAsync`.
+- Order service methods so the CRUD flow appears first: create/add first, then `UpdateAsync`, then `DeleteAsync`, and only after that other methods.
+- Services must not expose generic entity read shapes such as `GetByIdAsync`, `ListAsync`, or `AnalyzeAsync`.
 - Services must not contain transport logic or persistence-specific code.
 
 # Read Access
 
-- Read use cases must be exposed through dedicated query handler interfaces.
+- Generic entity read use cases must be exposed through dedicated query handler interfaces.
+- Focused configuration or state reads may stay on services backed by repositories when that keeps the design simpler.
 - Query handler interfaces belong to `SolarTracker.Application`; concrete implementations belong to `SolarTracker.Infrastructure`.
 
 # Contracts

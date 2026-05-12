@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
-using SolarTracker.Application.Dtos;
+using SolarTracker.Application.Dtos.LinearMotor;
 using SolarTracker.Application.Interfaces.Repositories;
-using SolarTracker.Application.Interfaces.Services;
+using SolarTracker.Application.Services;
 using SolarTracker.Domain.Entities;
 
 namespace SolarTracker.Tests.UnitTests.Application.Services;

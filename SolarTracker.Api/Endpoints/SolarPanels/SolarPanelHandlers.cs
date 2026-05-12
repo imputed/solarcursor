@@ -1,17 +1,16 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
-using SolarTracker.Application.Analysis;
-using SolarTracker.Application.Dtos;
 using SolarTracker.Application.Interfaces.QueryHandlers;
 using SolarTracker.Application.Interfaces.Services;
 using SolarTracker.Application.Mapping;
-using SolarTracker.Application.Results;
 using SolarTracker.Api.Errors;
 using SolarTracker.Api.Infrastructure;
 using SolarTracker.Api.Logging;
 using SolarTracker.Api.Routing;
 using SolarTracker.Domain.Entities;
+using SolarTracker.Application.Dtos.SolarPanel;
+using SolarTracker.Application.Analysis.SolarPanel;
 
 namespace SolarTracker.Api.Endpoints.SolarPanels;
 
@@ -39,15 +38,6 @@ internal static class SolarPanelHandlers
     {
         SolarPanel? entity = await queryHandler.GetByIdAsync(id, cancellationToken);
         return entity is null ? TypedResults.NotFound() : TypedResults.Ok(SolarPanelMapping.ToDto(entity));
-    }
-
-    internal static async Task<Results<Ok<SolarPanelCurrentPositionDto>, NotFound>> GetCurrentPositionAsync(
-        int id,
-        ISolarPanelService service,
-        CancellationToken cancellationToken)
-    {
-        Result<SolarPanelCurrentPositionDto> result = await service.GetCurrentPositionAsync(id, cancellationToken);
-        return result.IsSuccess ? TypedResults.Ok(result.Value) : TypedResults.NotFound();
     }
 
     internal static async Task<Results<Created<SolarPanelDto>, ValidationProblem, ProblemHttpResult>> CreateAsync(

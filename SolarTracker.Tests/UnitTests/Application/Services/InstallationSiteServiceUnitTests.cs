@@ -1,13 +1,14 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
-using SolarTracker.Application.Dtos;
+using SolarTracker.Application.Dtos.InstallationSite;
 using SolarTracker.Application.Errors;
-using SolarTracker.Application.Interfaces.Calculators;
 using SolarTracker.Application.Interfaces.QueryHandlers;
 using SolarTracker.Application.Interfaces.Repositories;
-using SolarTracker.Application.Interfaces.Services;
 using SolarTracker.Application.Results;
+using SolarTracker.Application.Services;
+using SolarTracker.Domain.Abstractions;
 using SolarTracker.Domain.Entities;
+using SolarTracker.Domain.ValueObjects;
 
 namespace SolarTracker.Tests.UnitTests.Application.Services;
 
@@ -20,7 +21,9 @@ public sealed class InstallationSiteServiceUnitTests
         CancellationToken cancellationToken = new CancellationTokenSource().Token;
         Mock<IInstallationSiteRepository> repository = new();
         Mock<IInstallationSiteQueryHandler> queryHandler = new();
-        Mock<ISolarPanelCalculator> solarPanelCalculator = new();
+        Mock<ITiltMeasuringUnitPositionReader> tiltMeasuringUnitPositionReader = new();
+        Mock<ISteeringCommandReceiver> steeringCommandReceiver = new();
+        Mock<ISolarOptimalPositionCalculator> solarOptimalPositionCalculator = new();
         repository.Setup(x => x.AddAsync(It.IsAny<InstallationSite>(), cancellationToken))
             .Callback<InstallationSite, CancellationToken>((entity, _) => entity.Id = 42)
             .Returns(ValueTask.CompletedTask);
@@ -28,7 +31,10 @@ public sealed class InstallationSiteServiceUnitTests
         InstallationSiteService service = new(
             repository.Object,
             queryHandler.Object,
-            solarPanelCalculator.Object,
+            tiltMeasuringUnitPositionReader.Object,
+            steeringCommandReceiver.Object,
+            solarOptimalPositionCalculator.Object,
+            TimeProvider.System,
             NullLogger<InstallationSiteService>.Instance);
         CreateInstallationSiteDto dto = new("Primary site", 50.1m, 8.6m);
 
@@ -55,14 +61,19 @@ public sealed class InstallationSiteServiceUnitTests
         CancellationToken cancellationToken = new CancellationTokenSource().Token;
         Mock<IInstallationSiteRepository> repository = new();
         Mock<IInstallationSiteQueryHandler> queryHandler = new();
-        Mock<ISolarPanelCalculator> solarPanelCalculator = new();
+        Mock<ITiltMeasuringUnitPositionReader> tiltMeasuringUnitPositionReader = new();
+        Mock<ISteeringCommandReceiver> steeringCommandReceiver = new();
+        Mock<ISolarOptimalPositionCalculator> solarOptimalPositionCalculator = new();
         repository.Setup(x => x.UpdateAsync(It.IsAny<InstallationSite>(), cancellationToken))
             .Returns(ValueTask.CompletedTask);
 
         InstallationSiteService service = new(
             repository.Object,
             queryHandler.Object,
-            solarPanelCalculator.Object,
+            tiltMeasuringUnitPositionReader.Object,
+            steeringCommandReceiver.Object,
+            solarOptimalPositionCalculator.Object,
+            TimeProvider.System,
             NullLogger<InstallationSiteService>.Instance);
         UpdateInstallationSiteDto dto = new(7, "Updated site", 49.2m, 9.4m);
 
@@ -89,14 +100,19 @@ public sealed class InstallationSiteServiceUnitTests
         CancellationToken cancellationToken = new CancellationTokenSource().Token;
         Mock<IInstallationSiteRepository> repository = new();
         Mock<IInstallationSiteQueryHandler> queryHandler = new();
-        Mock<ISolarPanelCalculator> solarPanelCalculator = new();
+        Mock<ITiltMeasuringUnitPositionReader> tiltMeasuringUnitPositionReader = new();
+        Mock<ISteeringCommandReceiver> steeringCommandReceiver = new();
+        Mock<ISolarOptimalPositionCalculator> solarOptimalPositionCalculator = new();
         repository.Setup(x => x.DeleteAsync(9, cancellationToken))
             .Returns(ValueTask.CompletedTask);
 
         InstallationSiteService service = new(
             repository.Object,
             queryHandler.Object,
-            solarPanelCalculator.Object,
+            tiltMeasuringUnitPositionReader.Object,
+            steeringCommandReceiver.Object,
+            solarOptimalPositionCalculator.Object,
+            TimeProvider.System,
             NullLogger<InstallationSiteService>.Instance);
 
         // Act
@@ -113,26 +129,27 @@ public sealed class InstallationSiteServiceUnitTests
         CancellationToken cancellationToken = new CancellationTokenSource().Token;
         Mock<IInstallationSiteRepository> repository = new();
         Mock<IInstallationSiteQueryHandler> queryHandler = new();
-        Mock<ISolarPanelCalculator> solarPanelCalculator = new();
+        Mock<ITiltMeasuringUnitPositionReader> tiltMeasuringUnitPositionReader = new();
+        Mock<ISteeringCommandReceiver> steeringCommandReceiver = new();
+        Mock<ISolarOptimalPositionCalculator> solarOptimalPositionCalculator = new();
         queryHandler.Setup(x => x.GetByIdAsync(5, cancellationToken))
             .Returns(ValueTask.FromResult<InstallationSite?>(null));
 
         InstallationSiteService service = new(
             repository.Object,
             queryHandler.Object,
-            solarPanelCalculator.Object,
+            tiltMeasuringUnitPositionReader.Object,
+            steeringCommandReceiver.Object,
+            solarOptimalPositionCalculator.Object,
+            TimeProvider.System,
             NullLogger<InstallationSiteService>.Instance);
 
         // Act
-        Result<IReadOnlyList<SolarPanelCurrentPositionDto>> result =
-            await service.MoveToOptimumAsync(5, cancellationToken);
+        Result result = await service.Optimize(5, cancellationToken);
 
         // Assert
         Assert.True(result.IsNotFound);
         Assert.Equal(SolarTrackerErrorCatalog.InstallationSite.NotFound(5), result.Error);
-        solarPanelCalculator.Verify(
-            x => x.MoveToOptimumAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()),
-            Times.Never);
     }
 
     [Fact]
@@ -142,7 +159,11 @@ public sealed class InstallationSiteServiceUnitTests
         CancellationToken cancellationToken = new CancellationTokenSource().Token;
         Mock<IInstallationSiteRepository> repository = new();
         Mock<IInstallationSiteQueryHandler> queryHandler = new();
-        Mock<ISolarPanelCalculator> solarPanelCalculator = new();
+        Mock<ITiltMeasuringUnitPositionReader> tiltMeasuringUnitPositionReader = new();
+        Mock<ISteeringCommandReceiver> steeringCommandReceiver = new();
+        Mock<ISolarOptimalPositionCalculator> solarOptimalPositionCalculator = new();
+        TiltMeasuringUnit firstTiltMeasuringUnit = new() { Id = 21, SolarPanelId = 12, GpioPin = 17 };
+        TiltMeasuringUnit secondTiltMeasuringUnit = new() { Id = 22, SolarPanelId = 14, GpioPin = 18 };
         InstallationSite installationSite = new()
         {
             Id = 5,
@@ -151,35 +172,129 @@ public sealed class InstallationSiteServiceUnitTests
             Longitude = 8.6m,
             SolarPanels =
             [
-                new SolarPanel { Id = 12, InstallationSiteId = 5, SerialNumber = "panel-12" },
-                new SolarPanel { Id = 14, InstallationSiteId = 5, SerialNumber = "panel-14" },
+                new SolarPanel
+                {
+                    Id = 12,
+                    InstallationSiteId = 5,
+                    SerialNumber = "panel-12",
+                    SolarTrackingConfiguration = new SolarTrackingConfiguration
+                    {
+                        SolarPanelId = 12,
+                        PositionThresholdDegrees = 0.5d,
+                        StepDurationMs = 0,
+                        MaxAdjustmentSteps = 1,
+                    },
+                    TiltMeasuringUnit = firstTiltMeasuringUnit,
+                    LinearMotors = [new LinearMotor { Id = 31, SolarPanelId = 12, MoveUpGpioPin = 10, MoveDownGpioPin = 11 }],
+                },
+                new SolarPanel
+                {
+                    Id = 14,
+                    InstallationSiteId = 5,
+                    SerialNumber = "panel-14",
+                    SolarTrackingConfiguration = new SolarTrackingConfiguration
+                    {
+                        SolarPanelId = 14,
+                        PositionThresholdDegrees = 0.5d,
+                        StepDurationMs = 0,
+                        MaxAdjustmentSteps = 1,
+                    },
+                    TiltMeasuringUnit = secondTiltMeasuringUnit,
+                    LinearMotors = [new LinearMotor { Id = 32, SolarPanelId = 14, MoveUpGpioPin = 12, MoveDownGpioPin = 13 }],
+                },
             ],
         };
-        Result<SolarPanelCurrentPositionDto> firstResult =
-            Result<SolarPanelCurrentPositionDto>.Success(new SolarPanelCurrentPositionDto(12, 35.0d, 34.2d));
-        Result<SolarPanelCurrentPositionDto> secondResult =
-            Result<SolarPanelCurrentPositionDto>.Success(new SolarPanelCurrentPositionDto(14, 35.0d, 35.0d));
+        DateTimeOffset utcNow = new(2026, 12, 21, 12, 0, 0, TimeSpan.Zero);
         queryHandler.Setup(x => x.GetByIdAsync(5, cancellationToken))
             .Returns(ValueTask.FromResult<InstallationSite?>(installationSite));
-        solarPanelCalculator.Setup(x => x.MoveToOptimumAsync(12, cancellationToken))
-            .Returns(ValueTask.FromResult(firstResult));
-        solarPanelCalculator.Setup(x => x.MoveToOptimumAsync(14, cancellationToken))
-            .Returns(ValueTask.FromResult(secondResult));
+        solarOptimalPositionCalculator.Setup(x => x.CalculateOptimalPosition(50.1m, 8.6m, utcNow))
+            .Returns(35.0d);
+        tiltMeasuringUnitPositionReader.Setup(x => x.GetCurrentPositionAsync(firstTiltMeasuringUnit, cancellationToken))
+            .Returns(ValueTask.FromResult(new TiltMeasurement(35.0d, new DateTime(2026, 12, 21, 12, 0, 1, DateTimeKind.Utc))));
+        tiltMeasuringUnitPositionReader.Setup(x => x.GetCurrentPositionAsync(secondTiltMeasuringUnit, cancellationToken))
+            .Returns(ValueTask.FromResult(new TiltMeasurement(35.0d, new DateTime(2026, 12, 21, 12, 0, 2, DateTimeKind.Utc))));
 
         InstallationSiteService service = new(
             repository.Object,
             queryHandler.Object,
-            solarPanelCalculator.Object,
+            tiltMeasuringUnitPositionReader.Object,
+            steeringCommandReceiver.Object,
+            solarOptimalPositionCalculator.Object,
+            new FixedTimeProvider(utcNow),
             NullLogger<InstallationSiteService>.Instance);
 
         // Act
-        Result<IReadOnlyList<SolarPanelCurrentPositionDto>> result =
-            await service.MoveToOptimumAsync(5, cancellationToken);
+        Result result = await service.Optimize(5, cancellationToken);
 
         // Assert
         Assert.True(result.IsSuccess);
-        Assert.Equal([firstResult.Value, secondResult.Value], result.Value);
-        solarPanelCalculator.Verify(x => x.MoveToOptimumAsync(12, cancellationToken), Times.Once);
-        solarPanelCalculator.Verify(x => x.MoveToOptimumAsync(14, cancellationToken), Times.Once);
+    }
+
+    [Fact]
+    public async Task MoveToOptimumAsync_ShouldReturnFailure_WhenSolarPanelMovementFails()
+    {
+        // Arrange
+        CancellationToken cancellationToken = new CancellationTokenSource().Token;
+        Mock<IInstallationSiteRepository> repository = new();
+        Mock<IInstallationSiteQueryHandler> queryHandler = new();
+        Mock<ITiltMeasuringUnitPositionReader> tiltMeasuringUnitPositionReader = new();
+        Mock<ISteeringCommandReceiver> steeringCommandReceiver = new();
+        Mock<ISolarOptimalPositionCalculator> solarOptimalPositionCalculator = new();
+        TiltMeasuringUnit tiltMeasuringUnit = new() { Id = 21, SolarPanelId = 12, GpioPin = 17 };
+        InstallationSite installationSite = new()
+        {
+            Id = 5,
+            Name = "Primary site",
+            Latitude = 50.1m,
+            Longitude = 8.6m,
+            SolarPanels =
+            [
+                new SolarPanel
+                {
+                    Id = 12,
+                    InstallationSiteId = 5,
+                    SerialNumber = "panel-12",
+                    SolarTrackingConfiguration = new SolarTrackingConfiguration
+                    {
+                        SolarPanelId = 12,
+                        PositionThresholdDegrees = 0.5d,
+                        StepDurationMs = 0,
+                        MaxAdjustmentSteps = 1,
+                    },
+                    TiltMeasuringUnit = tiltMeasuringUnit,
+                    LinearMotors = [new LinearMotor { Id = 31, SolarPanelId = 12, MoveUpGpioPin = 10, MoveDownGpioPin = 11 }],
+                },
+            ],
+        };
+        DateTimeOffset utcNow = new(2026, 12, 21, 12, 0, 0, TimeSpan.Zero);
+        queryHandler.Setup(x => x.GetByIdAsync(5, cancellationToken))
+            .Returns(ValueTask.FromResult<InstallationSite?>(installationSite));
+        solarOptimalPositionCalculator.Setup(x => x.CalculateOptimalPosition(50.1m, 8.6m, utcNow))
+            .Returns(35.0d);
+        tiltMeasuringUnitPositionReader.Setup(x => x.GetCurrentPositionAsync(tiltMeasuringUnit, cancellationToken))
+            .Returns(ValueTask.FromResult(new TiltMeasurement(0d, new DateTime(2026, 12, 21, 12, 0, 1, DateTimeKind.Utc))));
+        steeringCommandReceiver.Setup(x => x.MoveUpAsync(10, 11, cancellationToken))
+            .Returns(ValueTask.FromException(new InvalidOperationException("motor blocked")));
+
+        InstallationSiteService service = new(
+            repository.Object,
+            queryHandler.Object,
+            tiltMeasuringUnitPositionReader.Object,
+            steeringCommandReceiver.Object,
+            solarOptimalPositionCalculator.Object,
+            new FixedTimeProvider(utcNow),
+            NullLogger<InstallationSiteService>.Instance);
+
+        // Act
+        Result result = await service.Optimize(5, cancellationToken);
+
+        // Assert
+        Assert.False(result.IsSuccess);
+        Assert.Equal("solar-panel-movement-failed", result.Error?.Code);
+    }
+
+    private sealed class FixedTimeProvider(DateTimeOffset utcNow) : TimeProvider
+    {
+        public override DateTimeOffset GetUtcNow() => utcNow;
     }
 }

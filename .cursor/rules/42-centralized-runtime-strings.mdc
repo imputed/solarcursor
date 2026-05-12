@@ -7,8 +7,10 @@ alwaysApply: false
 # Centralized Runtime Strings
 
 - Do not embed runtime-facing string literals or templates directly inside normal class methods.
-- Centralize error codes, error messages, validation messages, problem titles/details, and exception text in dedicated catalog or resource-style classes.
+- Centralize error codes, error messages, validation messages, problem titles/details, and custom exception text in dedicated catalog or resource-style classes.
 - Reference the centralized catalog from handlers, services, validators, infrastructure helpers, and configuration code.
+- When mapping domain result types or enum statuses to `ResultError` or exception text, place the mapping helper in the owning error/text catalog instead of leaving that logic in handlers or services.
+- Small non-user-facing literals such as log property values, parameter names, and similar low-value technical strings do not need catalog entries.
 - Prefer small, concern-focused catalog classes close to the owning layer instead of a single global dump file.
 - It is acceptable for the centralized catalog itself to contain the literal text or formatting template.
 - Test assertions may keep explicit expected strings when that improves test clarity and avoids coupling the test to the production catalog.

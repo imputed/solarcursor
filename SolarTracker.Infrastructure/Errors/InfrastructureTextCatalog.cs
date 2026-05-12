@@ -1,5 +1,5 @@
 using System.Globalization;
-using SolarTracker.Application.Analysis;
+using SolarTracker.Application.Analysis.Common;
 
 namespace SolarTracker.Infrastructure.Errors;
 

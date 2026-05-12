@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace SolarTracker.Application.Analysis;
+namespace SolarTracker.Application.Analysis.InstallationSite;
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "kind")]
 [JsonDerivedType(typeof(InstallationSiteLeafPredicate), "predicate")]

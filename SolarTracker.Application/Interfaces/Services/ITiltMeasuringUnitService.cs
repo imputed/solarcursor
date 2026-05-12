@@ -1,4 +1,4 @@
-using SolarTracker.Application.Dtos;
+using SolarTracker.Application.Dtos.TiltMeasuringUnit;
 
 namespace SolarTracker.Application.Interfaces.Services;
 

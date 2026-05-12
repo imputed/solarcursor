@@ -1,5 +1,5 @@
 using System.Linq.Expressions;
-using SolarTracker.Application.Analysis;
+using SolarTracker.Application.Analysis.InstallationSite;
 using SolarTracker.Infrastructure.Analysis.Common;
 using SolarTracker.Infrastructure.Persistence.Entities;
 

@@ -1,8 +1,6 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
-using SolarTracker.Application.Analysis;
-using SolarTracker.Application.Dtos;
 using SolarTracker.Application.Interfaces.QueryHandlers;
 using SolarTracker.Application.Interfaces.Services;
 using SolarTracker.Application.Mapping;
@@ -12,6 +10,8 @@ using SolarTracker.Api.Infrastructure;
 using SolarTracker.Api.Logging;
 using SolarTracker.Api.Routing;
 using SolarTracker.Domain.Entities;
+using SolarTracker.Application.Dtos.InstallationSite;
+using SolarTracker.Application.Analysis.InstallationSite;
 
 namespace SolarTracker.Api.Endpoints.InstallationSites;
 
@@ -41,15 +41,15 @@ internal static class InstallationSiteHandlers
         return entity is null ? TypedResults.NotFound() : TypedResults.Ok(InstallationSiteMapping.ToDto(entity));
     }
 
-    internal static async Task<Results<Ok<IReadOnlyList<SolarPanelCurrentPositionDto>>, NotFound, ProblemHttpResult>> MoveToOptimumAsync(
+    internal static async Task<Results<NoContent, NotFound, ProblemHttpResult>> MoveToOptimumAsync(
         int id,
         IInstallationSiteService service,
         ILoggerFactory loggerFactory,
         CancellationToken cancellationToken)
     {
-        Result<IReadOnlyList<SolarPanelCurrentPositionDto>> result = await service.MoveToOptimumAsync(id, cancellationToken);
+        Result result = await service.Optimize(id, cancellationToken);
         if (result.IsSuccess)
-            return TypedResults.Ok(result.Value);
+            return TypedResults.NoContent();
 
         if (result.IsNotFound)
             return TypedResults.NotFound();

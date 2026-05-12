@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Http.HttpResults;
-using SolarTracker.Application.Dtos;
+using SolarTracker.Application.Dtos.SolarPanelOptimizationState;
 using SolarTracker.Application.Interfaces.Services;
 using SolarTracker.Application.Results;
 

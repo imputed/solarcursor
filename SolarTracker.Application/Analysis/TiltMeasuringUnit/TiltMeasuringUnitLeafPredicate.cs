@@ -1,4 +1,6 @@
-namespace SolarTracker.Application.Analysis;
+using SolarTracker.Application.Analysis.Common;
+
+namespace SolarTracker.Application.Analysis.TiltMeasuringUnit;
 
 public sealed record TiltMeasuringUnitLeafPredicate(
     TiltMeasuringUnitAnalyzeField Field,

@@ -1,6 +1,6 @@
 ---
 description: Analyze endpoint and filtering rules
-globs: SolarTracker.Application/Analysis/**/*.cs, SolarTracker.Infrastructure/Analysis/**/*.cs, SolarTracker.Api/Validation/Analyze/**/*.cs
+globs: SolarTracker.Application/Analysis/**/*.cs, SolarTracker.Infrastructure/Analysis/**/*.cs, SolarTracker.Infrastructure/QueryHandlers/**/*.cs, SolarTracker.Api/Validation/Analyze/**/*.cs, SolarTracker.Api/Endpoints/**/*.cs
 alwaysApply: false
 ---
 
@@ -15,9 +15,12 @@ alwaysApply: false
 
 - Analyze trees must be translated into EF-translatable expressions.
 - Filtering and sorting must execute in the database, not in memory.
-- `GET /...` collection endpoints must internally use `AnalyzeAsync(...)` with a default request.
+- `POST /analyze` endpoints must validate the request and delegate to the corresponding query handler `AnalyzeAsync(...)`.
+- If no sort field is provided, default sorting may be applied by the query layer.
 
 # Validation
 
-- Validate operators, fields, skip, and take values before query execution.
+- Validate operators, fields, skip, and take values before query execution. The maximum for take is 100
 - Reject unsupported fields and operators early.
+- Enforce the current graph safety limits for analyze requests, including maximum nesting depth and maximum leaf count.
+- Reject null combiner items and invalid field/operator/operand combinations before query execution.

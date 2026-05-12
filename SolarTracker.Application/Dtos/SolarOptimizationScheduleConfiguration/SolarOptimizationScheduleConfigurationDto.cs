@@ -1,3 +1,3 @@
-namespace SolarTracker.Application.Dtos;
+namespace SolarTracker.Application.Dtos.SolarOptimizationScheduleConfiguration;
 
 public readonly record struct SolarOptimizationScheduleConfigurationDto(int IntervalMinutes);

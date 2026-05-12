@@ -1,4 +1,7 @@
-using SolarTracker.Application.Dtos;
+using SolarTracker.Application.Dtos.SolarPanel;
+using SolarTracker.Application.Dtos.CurrentMeasuringUnit;
+using SolarTracker.Application.Dtos.LinearMotor;
+using SolarTracker.Application.Dtos.TiltMeasuringUnit;
 using SolarTracker.Application.Mapping;
 using SolarTracker.Domain.Entities;
 

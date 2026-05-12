@@ -1,11 +1,12 @@
-using SolarTracker.Application.Dtos;
 using SolarTracker.Application.Interfaces.Repositories;
 using SolarTracker.Application.Mapping;
 using SolarTracker.Application.Logging;
 using SolarTracker.Domain.Entities;
 using Microsoft.Extensions.Logging;
+using SolarTracker.Application.Interfaces.Services;
+using SolarTracker.Application.Dtos.CurrentMeasuringUnit;
 
-namespace SolarTracker.Application.Interfaces.Services;
+namespace SolarTracker.Application.Services;
 
 public sealed class CurrentMeasuringUnitService(
     ICurrentMeasuringUnitRepository repository,

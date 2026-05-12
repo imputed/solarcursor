@@ -1,4 +1,4 @@
-using SolarTracker.Application.Dtos;
+using SolarTracker.Application.Dtos.LinearMotor;
 
 namespace SolarTracker.Api.Endpoints.LinearMotors;
 

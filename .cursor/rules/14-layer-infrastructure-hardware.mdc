@@ -1,18 +1,18 @@
 ---
 description: Infrastructure hardware and GPIO rules
-globs: SolarTracker.Infrastructure/Hardware/**/*.cs, SolarTracker.Application/Interfaces/Hardware/**/*.cs
+globs: SolarTracker.Infrastructure/Hardware/**/*.cs, SolarTracker.Domain/Abstractions/**/*.cs
 alwaysApply: false
 ---
 
 # Infrastructure Hardware
 
 - GPIO access belongs to `SolarTracker.Infrastructure`.
-- Hardware abstractions belong to `SolarTracker.Application.Interfaces.Hardware`; concrete implementations belong to `SolarTracker.Infrastructure.Hardware`.
+- Hardware abstractions for GPIO-backed behavior belong to `SolarTracker.Domain.Abstractions`; concrete implementations belong to `SolarTracker.Infrastructure.Hardware`.
 - Hardware services must remain stateless and cancellation-aware.
 
 # Raspberry Pi Rules
 
 - The project must support execution on Raspberry Pi hardware.
-- Linear motor control must expose `MoveUpAsync` and `MoveDownAsync`.
+- Linear motor control must expose `MoveUpAsync`, `MoveDownAsync`, and `StopAsync`.
 - Hardware implementations must not contain domain orchestration or persistence logic.
 - Development and non-hardware environments may use a fake actuator implementation.

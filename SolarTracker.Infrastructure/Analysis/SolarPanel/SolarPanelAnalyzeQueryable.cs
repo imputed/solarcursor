@@ -1,4 +1,4 @@
-using SolarTracker.Application.Analysis;
+using SolarTracker.Application.Analysis.SolarPanel;
 using SolarTracker.Infrastructure.Persistence.Entities;
 
 namespace SolarTracker.Infrastructure.Analysis.SolarPanel;

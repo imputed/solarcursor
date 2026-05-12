@@ -1,4 +1,4 @@
-using SolarTracker.Application.Analysis;
+using SolarTracker.Application.Analysis.TiltMeasuringUnit;
 using SolarTracker.Infrastructure.Persistence.Entities;
 
 namespace SolarTracker.Infrastructure.Analysis.TiltMeasuringUnit;

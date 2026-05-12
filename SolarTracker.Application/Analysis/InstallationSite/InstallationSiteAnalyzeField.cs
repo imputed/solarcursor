@@ -1,4 +1,4 @@
-namespace SolarTracker.Application.Analysis;
+namespace SolarTracker.Application.Analysis.InstallationSite;
 
 public enum InstallationSiteAnalyzeField
 {

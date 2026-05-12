@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using SolarTracker.Api.Endpoints.InstallationSites;
-using SolarTracker.Application.Dtos;
+using SolarTracker.Application.Dtos.InstallationSite;
 using SolarTracker.Application.Interfaces.QueryHandlers;
 using SolarTracker.Application.Interfaces.Services;
 using SolarTracker.Application.Results;
@@ -24,11 +24,11 @@ public sealed class InstallationSiteHandlersUnitTests
         Mock<ILoggerFactory> loggerFactory = new();
         loggerFactory.Setup(x => x.CreateLogger(It.IsAny<string>()))
             .Returns((ILogger)NullLogger.Instance);
-        service.Setup(x => x.MoveToOptimumAsync(7, cancellationToken))
-            .Returns(ValueTask.FromResult(
-                Result<IReadOnlyList<SolarPanelCurrentPositionDto>>.Failure(
+        service.Setup(x => x.Optimize(7, cancellationToken))
+            .ReturnsAsync(
+                Result.Failure(
                     "solar-panel-threshold-not-met",
-                    "Solar panel 12 did not reach the configured threshold in the allowed number of steps.")));
+                    "Solar panel 12 did not reach the configured threshold in the allowed number of steps."));
 
         // Act
         var result = await InstallationSiteHandlers.MoveToOptimumAsync(

@@ -4,17 +4,6 @@ namespace SolarTracker.Infrastructure.Logging;
 
 internal static partial class InfrastructureLog
 {
-    [LoggerMessage(EventId = 2000, Level = LogLevel.Warning, Message = "MoveToOptimum reached the configured maximum step count for solar panel {SolarPanelId}.")]
-    internal static partial void MoveToOptimumMaxStepsReached(ILogger logger, int solarPanelId);
-
-    [LoggerMessage(EventId = 2001, Level = LogLevel.Warning, Message = "Recovering solar panel {SolarPanelId} after motor movement failed at linear motor {LinearMotorId}. {Code}: {Message}")]
-    internal static partial void RecoveringSolarPanelMovement(
-        ILogger logger,
-        int solarPanelId,
-        int linearMotorId,
-        string code,
-        string message);
-
     [LoggerMessage(EventId = 2002, Level = LogLevel.Warning, Message = "Automatic optimization failed for solar panel {SolarPanelId}. {Code}: {Message}")]
     internal static partial void AutomaticOptimizationFailed(ILogger logger, int solarPanelId, string code, string message);
 
@@ -49,8 +38,4 @@ internal static partial class InfrastructureLog
 
     [LoggerMessage(EventId = 2008, Level = LogLevel.Debug, Message = "Simulating tilt read for measuring unit {TiltMeasuringUnitId} on GPIO pin {GpioPin}.")]
     internal static partial void SimulatingTiltRead(ILogger logger, int tiltMeasuringUnitId, int gpioPin);
-
-    [LoggerMessage(EventId = 2009, Level = LogLevel.Warning, Message = "Linear motor {LinearMotorId} was not found while building the movement context.")]
-    internal static partial void LinearMotorNotFound(ILogger logger, int linearMotorId);
-
 }

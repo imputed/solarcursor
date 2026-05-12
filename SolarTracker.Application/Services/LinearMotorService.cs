@@ -1,11 +1,12 @@
 using Microsoft.Extensions.Logging;
 using SolarTracker.Application.Logging;
-using SolarTracker.Application.Dtos;
 using SolarTracker.Application.Mapping;
 using SolarTracker.Application.Interfaces.Repositories;
 using SolarTracker.Domain.Entities;
+using SolarTracker.Application.Interfaces.Services;
+using SolarTracker.Application.Dtos.LinearMotor;
 
-namespace SolarTracker.Application.Interfaces.Services;
+namespace SolarTracker.Application.Services;
 
 public sealed class LinearMotorService(
     ILinearMotorRepository repository,

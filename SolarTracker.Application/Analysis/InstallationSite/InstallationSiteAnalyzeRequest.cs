@@ -1,4 +1,4 @@
-namespace SolarTracker.Application.Analysis;
+namespace SolarTracker.Application.Analysis.InstallationSite;
 
 /// <summary>Scalar fields only — no filtering on navigations.</summary>
 public sealed record InstallationSiteAnalyzeRequest(

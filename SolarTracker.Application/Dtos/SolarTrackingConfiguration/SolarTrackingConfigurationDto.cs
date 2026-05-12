@@ -1,4 +1,4 @@
-namespace SolarTracker.Application.Dtos;
+namespace SolarTracker.Application.Dtos.SolarTrackingConfiguration;
 
 public sealed record SolarTrackingConfigurationDto(
     int SolarPanelId,

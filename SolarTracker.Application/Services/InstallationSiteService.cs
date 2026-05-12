@@ -1,20 +1,24 @@
 using Microsoft.Extensions.Logging;
 using SolarTracker.Application.Errors;
 using SolarTracker.Application.Logging;
-using SolarTracker.Application.Dtos;
-using SolarTracker.Application.Interfaces.Calculators;
 using SolarTracker.Application.Interfaces.QueryHandlers;
-using SolarTracker.Application.Mapping;
 using SolarTracker.Application.Interfaces.Repositories;
+using SolarTracker.Application.Mapping;
 using SolarTracker.Application.Results;
+using SolarTracker.Domain.Abstractions;
 using SolarTracker.Domain.Entities;
+using SolarTracker.Application.Dtos.InstallationSite;
+using SolarTracker.Application.Interfaces.Services;
 
-namespace SolarTracker.Application.Interfaces.Services;
+namespace SolarTracker.Application.Services;
 
 public sealed class InstallationSiteService(
     IInstallationSiteRepository repository,
     IInstallationSiteQueryHandler queryHandler,
-    ISolarPanelCalculator solarPanelCalculator,
+    ITiltMeasuringUnitPositionReader tiltMeasuringUnitPositionReader,
+    ISteeringCommandReceiver steeringCommandReceiver,
+    ISolarOptimalPositionCalculator solarOptimalPositionCalculator,
+    TimeProvider timeProvider,
     ILogger<InstallationSiteService> logger) : IInstallationSiteService
 {
     public async ValueTask<int> AddAsync(CreateInstallationSiteDto dto, CancellationToken cancellationToken)
@@ -32,43 +36,31 @@ public sealed class InstallationSiteService(
         ApplicationLog.UpdatedInstallationSite(logger, entity.Id);
     }
 
-    public async ValueTask<Result<IReadOnlyList<SolarPanelCurrentPositionDto>>> MoveToOptimumAsync(
-        int id,
-        CancellationToken cancellationToken)
+    public async ValueTask DeleteAsync(int id, CancellationToken cancellationToken)
+    {
+        await repository.DeleteAsync(id, cancellationToken);
+        ApplicationLog.DeletedInstallationSite(logger, id);
+    }
+
+    public async Task<Result> Optimize(int id, CancellationToken cancellationToken)
     {
         InstallationSite? installationSite = await queryHandler.GetByIdAsync(id, cancellationToken);
         if (installationSite is null)
         {
             ResultError error = SolarTrackerErrorCatalog.InstallationSite.NotFound(id);
             ApplicationLog.InstallationSiteMoveToOptimumFailed(logger, id, error.Code, error.Message);
-            return Result<IReadOnlyList<SolarPanelCurrentPositionDto>>.NotFound(error);
+            return Result.NotFound(error);
         }
 
-        List<SolarPanelCurrentPositionDto> solarPanelPositions = new(installationSite.SolarPanels.Count);
-        foreach (SolarPanel solarPanel in installationSite.SolarPanels.OrderBy(x => x.Id))
+        var optimizationResult = await installationSite.OptimizeAsync(solarOptimalPositionCalculator, timeProvider.GetUtcNow(), tiltMeasuringUnitPositionReader, steeringCommandReceiver, cancellationToken);
+        if (!optimizationResult.IsSuccess)
         {
-            Result<SolarPanelCurrentPositionDto> result =
-                await solarPanelCalculator.MoveToOptimumAsync(solarPanel.Id, cancellationToken);
-            if (result.IsSuccess)
-            {
-                solarPanelPositions.Add(result.Value);
-                continue;
-            }
-
-            ResultError error = result.Error!.Value;
+            ResultError error = SolarTrackerErrorCatalog.InstallationSite.OptimizationFailure(optimizationResult);
             ApplicationLog.InstallationSiteMoveToOptimumFailed(logger, id, error.Code, error.Message);
-            return result.IsNotFound
-                ? Result<IReadOnlyList<SolarPanelCurrentPositionDto>>.NotFound(error)
-                : Result<IReadOnlyList<SolarPanelCurrentPositionDto>>.Failure(error);
+            return Result.Failure(error);
         }
 
-        ApplicationLog.InstallationSiteMoveToOptimumCompleted(logger, id, solarPanelPositions.Count);
-        return Result<IReadOnlyList<SolarPanelCurrentPositionDto>>.Success(solarPanelPositions);
-    }
-
-    public async ValueTask DeleteAsync(int id, CancellationToken cancellationToken)
-    {
-        await repository.DeleteAsync(id, cancellationToken);
-        ApplicationLog.DeletedInstallationSite(logger, id);
+        ApplicationLog.InstallationSiteMoveToOptimumCompleted(logger, id, installationSite.SolarPanels.Count);
+        return Result.Success();
     }
 }

@@ -6,7 +6,8 @@ alwaysApply: false
 
 # File Size Limit
 
-- Handwritten C# source files should stay at or below `200` total lines.
-- If a change would push a file beyond `200` lines, extract a helper, mapper, validator, options type, endpoint handler, or domain/application/infrastructure collaborator into its own file.
+- Handwritten production C# source files should usually stay at or below `200` total lines.
+- If a production-code change would push a file beyond `200` lines, extract a helper, mapper, validator, options type, endpoint handler, or domain/application/infrastructure collaborator into its own file.
+- Test files may exceed this limit when keeping closely related scenarios together is clearer, but they should still be reviewed for extractable helpers once they grow substantially.
 - Keep one clear responsibility per file; do not keep unrelated helpers together just to avoid creating a new file.
 - Generated files may exceed this limit when the generator controls the shape, such as EF Core migration designer files or model snapshots.

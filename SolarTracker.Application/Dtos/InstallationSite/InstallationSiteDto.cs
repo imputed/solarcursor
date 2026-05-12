@@ -1,4 +1,6 @@
-namespace SolarTracker.Application.Dtos;
+using SolarTracker.Application.Dtos.SolarPanel;
+
+namespace SolarTracker.Application.Dtos.InstallationSite;
 
 public sealed record InstallationSiteDto(
     int Id,

@@ -1,6 +1,6 @@
 using FluentValidation;
-using SolarTracker.Application.Analysis;
 using SolarTracker.Api.Validation;
+using SolarTracker.Application.Analysis.LinearMotor;
 
 namespace SolarTracker.Api.Validation.Analyze;
 
@@ -11,7 +11,7 @@ public sealed class LinearMotorAnalyzeRequestValidator : AbstractValidator<Linea
 
     public LinearMotorAnalyzeRequestValidator()
     {
-        RuleFor(r => r.Take).InclusiveBetween(1, 500);
+        RuleFor(r => r.Take).InclusiveBetween(1, 100);
         RuleFor(r => r.Skip).GreaterThanOrEqualTo(0);
         RuleFor(r => r.SortBy).Must(f => !f.HasValue || Enum.IsDefined(f.Value))
             .WithMessage(ValidationMessageCatalog.SortByMustBeDefinedWhitelistedField());

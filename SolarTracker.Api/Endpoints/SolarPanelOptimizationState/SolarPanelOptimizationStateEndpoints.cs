@@ -1,4 +1,4 @@
-using SolarTracker.Application.Dtos;
+using SolarTracker.Application.Dtos.SolarPanelOptimizationState;
 
 namespace SolarTracker.Api.Endpoints.SolarPanelOptimizationState;
 

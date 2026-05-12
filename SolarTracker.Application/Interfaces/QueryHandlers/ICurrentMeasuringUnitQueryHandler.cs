@@ -1,4 +1,4 @@
-using SolarTracker.Application.Analysis;
+using SolarTracker.Application.Analysis.CurrentMeasuringUnit;
 using SolarTracker.Domain.Entities;
 
 namespace SolarTracker.Application.Interfaces.QueryHandlers;

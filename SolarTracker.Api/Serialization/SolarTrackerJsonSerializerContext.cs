@@ -1,7 +1,19 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using SolarTracker.Application.Analysis;
-using SolarTracker.Application.Dtos;
+using SolarTracker.Application.Analysis.Common;
+using SolarTracker.Application.Analysis.CurrentMeasuringUnit;
+using SolarTracker.Application.Analysis.InstallationSite;
+using SolarTracker.Application.Analysis.LinearMotor;
+using SolarTracker.Application.Analysis.SolarPanel;
+using SolarTracker.Application.Analysis.TiltMeasuringUnit;
+using SolarTracker.Application.Dtos.CurrentMeasuringUnit;
+using SolarTracker.Application.Dtos.InstallationSite;
+using SolarTracker.Application.Dtos.LinearMotor;
+using SolarTracker.Application.Dtos.SolarOptimizationScheduleConfiguration;
+using SolarTracker.Application.Dtos.SolarPanel;
+using SolarTracker.Application.Dtos.SolarPanelOptimizationState;
+using SolarTracker.Application.Dtos.SolarTrackingConfiguration;
+using SolarTracker.Application.Dtos.TiltMeasuringUnit;
 
 namespace SolarTracker.Api.Serialization;
 
@@ -12,9 +24,6 @@ namespace SolarTracker.Api.Serialization;
 [JsonSerializable(typeof(IReadOnlyList<InstallationSiteDto>))]
 [JsonSerializable(typeof(List<InstallationSiteDto>))]
 [JsonSerializable(typeof(SolarPanelDto))]
-[JsonSerializable(typeof(SolarPanelCurrentPositionDto))]
-[JsonSerializable(typeof(IReadOnlyList<SolarPanelCurrentPositionDto>))]
-[JsonSerializable(typeof(List<SolarPanelCurrentPositionDto>))]
 [JsonSerializable(typeof(SolarPanelOptimizationStateDto))]
 [JsonSerializable(typeof(CreateSolarPanelDto))]
 [JsonSerializable(typeof(UpdateSolarPanelOptimizationStateDto))]

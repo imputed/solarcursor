@@ -1,4 +1,4 @@
-using SolarTracker.Application.Dtos;
+using SolarTracker.Application.Dtos.InstallationSite;
 
 namespace SolarTracker.Api.Endpoints.InstallationSites;
 
@@ -21,7 +21,7 @@ internal static class InstallationSiteEndpoints
 
         group.MapPost("/{id:int}/move-to-optimum", InstallationSiteHandlers.MoveToOptimumAsync)
             .WithName("MoveInstallationSiteToOptimum")
-            .Produces<IReadOnlyList<SolarPanelCurrentPositionDto>>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status204NoContent)
             .ProducesProblem(StatusCodes.Status409Conflict)
             .Produces(StatusCodes.Status404NotFound);
 

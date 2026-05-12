@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace SolarTracker.Application.Analysis;
+namespace SolarTracker.Application.Analysis.TiltMeasuringUnit;
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "kind")]
 [JsonDerivedType(typeof(TiltMeasuringUnitLeafPredicate), "predicate")]

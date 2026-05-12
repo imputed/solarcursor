@@ -1,6 +1,6 @@
 using FluentValidation;
-using SolarTracker.Application.Dtos;
 using SolarTracker.Api.Validation;
+using SolarTracker.Application.Dtos.LinearMotor;
 
 namespace SolarTracker.Api.Validation.LinearMotors;
 

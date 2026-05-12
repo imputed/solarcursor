@@ -1,5 +1,6 @@
 using System.Globalization;
 using SolarTracker.Application.Results;
+using SolarTracker.Domain.ValueObjects;
 
 namespace SolarTracker.Application.Errors;
 
@@ -16,12 +17,19 @@ public static class SolarTrackerErrorCatalog
         private const string ThresholdNotMetCode = "solar-panel-threshold-not-met";
         private const string ThresholdNotMetTemplate =
             "Solar panel {0} did not reach the configured threshold in the allowed number of steps.";
+        private const string MovementFailedCode = "solar-panel-movement-failed";
+        private const string MovementFailedTemplate =
+            "Solar panel {0} movement failed at linear motor {1}. {2}";
         private const string MovementRecoveryFailedCode = "solar-panel-movement-recovery-failed";
         private const string MovementRecoveryFailedTemplate =
-            "Solar panel {0} failed to recover after motor {1} failed. Original error: {2}: {3}. Recovery error: {4}: {5}";
+            "Solar panel {0} failed to recover after motor {1} failed. Original error: {2}. Recovery error: {3}";
         private const string MovementStepRevertedCode = "solar-panel-movement-step-reverted";
         private const string MovementStepRevertedTemplate =
-            "Solar panel {0} movement failed at linear motor {1}, and the already completed motor movements were reverted. Original error: {2}: {3}";
+            "Solar panel {0} movement failed at linear motor {1}, and the already completed motor movements were reverted. Original error: {2}";
+        private const string UnsupportedMovementValidationResultTemplate =
+            "Unsupported solar panel movement validation result '{0}'.";
+        private const string UnsupportedMoveResultStatusTemplate =
+            "Unsupported solar panel move result status '{0}'.";
 
         public static ResultError NotFound(int solarPanelId) =>
             new(NotFoundCode, string.Format(CultureInfo.InvariantCulture, NotFoundTemplate, solarPanelId));
@@ -39,11 +47,21 @@ public static class SolarTrackerErrorCatalog
         public static ResultError ThresholdNotMet(int solarPanelId) =>
             new(ThresholdNotMetCode, string.Format(CultureInfo.InvariantCulture, ThresholdNotMetTemplate, solarPanelId));
 
+        public static ResultError MovementFailed(int solarPanelId, int failedLinearMotorId, string failureMessage) =>
+            new(
+                MovementFailedCode,
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    MovementFailedTemplate,
+                    solarPanelId,
+                    failedLinearMotorId,
+                    failureMessage));
+
         public static ResultError MovementRecoveryFailed(
             int solarPanelId,
             int failedLinearMotorId,
-            ResultError moveError,
-            ResultError recoveryError) =>
+            string moveFailureMessage,
+            string recoveryFailureMessage) =>
             new(
                 MovementRecoveryFailedCode,
                 string.Format(
@@ -51,15 +69,13 @@ public static class SolarTrackerErrorCatalog
                     MovementRecoveryFailedTemplate,
                     solarPanelId,
                     failedLinearMotorId,
-                    moveError.Code,
-                    moveError.Message,
-                    recoveryError.Code,
-                    recoveryError.Message));
+                    moveFailureMessage,
+                    recoveryFailureMessage));
 
         public static ResultError MovementStepReverted(
             int solarPanelId,
             int failedLinearMotorId,
-            ResultError moveError) =>
+            string moveFailureMessage) =>
             new(
                 MovementStepRevertedCode,
                 string.Format(
@@ -67,37 +83,94 @@ public static class SolarTrackerErrorCatalog
                     MovementStepRevertedTemplate,
                     solarPanelId,
                     failedLinearMotorId,
-                    moveError.Code,
-                    moveError.Message));
+                    moveFailureMessage));
+
+        public static ResultError MovementValidationFailure(
+            int solarPanelId,
+            SolarPanelMovementValidationResult validationResult) =>
+            validationResult switch
+            {
+                SolarPanelMovementValidationResult.TiltMeasuringUnitMissing =>
+                    TiltMeasuringUnitMissing(solarPanelId),
+                SolarPanelMovementValidationResult.LinearMotorsMissing =>
+                    LinearMotorsMissing(solarPanelId),
+                _ => throw UnsupportedMovementValidationResult(validationResult),
+            };
+
+        public static ResultError MoveFailure(int solarPanelId, SolarPanelMoveResult moveResult) =>
+            moveResult.Status switch
+            {
+                SolarPanelMoveResultStatus.ThresholdNotMet =>
+                    ThresholdNotMet(solarPanelId),
+                SolarPanelMoveResultStatus.MovementFailed =>
+                    MovementFailed(
+                        solarPanelId,
+                        moveResult.FailedLinearMotorId!.Value,
+                        moveResult.FailureMessage!),
+                SolarPanelMoveResultStatus.MovementStepReverted =>
+                    MovementStepReverted(
+                        solarPanelId,
+                        moveResult.FailedLinearMotorId!.Value,
+                        moveResult.FailureMessage!),
+                SolarPanelMoveResultStatus.MovementRecoveryFailed =>
+                    MovementRecoveryFailed(
+                        solarPanelId,
+                        moveResult.FailedLinearMotorId!.Value,
+                        moveResult.FailureMessage!,
+                        moveResult.RecoveryFailureMessage!),
+                _ => throw UnsupportedMoveResultStatus(moveResult.Status),
+            };
+
+        private static InvalidOperationException UnsupportedMovementValidationResult(
+            SolarPanelMovementValidationResult validationResult) =>
+            new(
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    UnsupportedMovementValidationResultTemplate,
+                    validationResult));
+
+        private static InvalidOperationException UnsupportedMoveResultStatus(
+            SolarPanelMoveResultStatus status) =>
+            new(
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    UnsupportedMoveResultStatusTemplate,
+                    status));
     }
 
     public static class InstallationSite
     {
         private const string NotFoundCode = "installation-site-not-found";
         private const string NotFoundTemplate = "Installation site {0} was not found.";
+        private const string UnsupportedOptimizationResultStatusTemplate =
+            "Unsupported installation site optimization result status '{0}'.";
 
         public static ResultError NotFound(int installationSiteId) =>
             new(NotFoundCode, string.Format(CultureInfo.InvariantCulture, NotFoundTemplate, installationSiteId));
-    }
 
-    public static class LinearMotor
-    {
-        private const string NotFoundCode = "linear-motor-not-found";
-        private const string NotFoundTemplate = "Linear motor {0} was not found.";
-        private const string RecoveryFailedCode = "linear-motor-recovery-failed";
-        private const string RecoveryFailedTemplate = "Linear motor {0} could not be recovered. {1}: {2}";
+        public static ResultError OptimizationFailure(InstallationSiteOptimizationResult optimizationResult)
+        {
+            int solarPanelId = optimizationResult.FailedSolarPanelId!.Value;
+            return optimizationResult.Status switch
+            {
+                InstallationSiteOptimizationResultStatus.SolarPanelValidationFailed =>
+                    SolarPanel.MovementValidationFailure(
+                        solarPanelId,
+                        optimizationResult.ValidationResult!.Value),
+                InstallationSiteOptimizationResultStatus.SolarPanelMovementFailed =>
+                    SolarPanel.MoveFailure(
+                        solarPanelId,
+                        optimizationResult.MoveResult!.Value),
+                _ => throw UnsupportedOptimizationResultStatus(optimizationResult.Status),
+            };
+        }
 
-        public static ResultError NotFound(int linearMotorId) =>
-            new(NotFoundCode, string.Format(CultureInfo.InvariantCulture, NotFoundTemplate, linearMotorId));
-
-        public static ResultError RecoveryFailed(int linearMotorId, ResultError recoveryError) =>
+        private static InvalidOperationException UnsupportedOptimizationResultStatus(
+            InstallationSiteOptimizationResultStatus status) =>
             new(
-                RecoveryFailedCode,
                 string.Format(
                     CultureInfo.InvariantCulture,
-                    RecoveryFailedTemplate,
-                    linearMotorId,
-                    recoveryError.Code,
-                    recoveryError.Message));
+                    UnsupportedOptimizationResultStatusTemplate,
+                    status));
     }
 }

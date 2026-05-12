@@ -6,9 +6,8 @@ alwaysApply: false
 
 # Infrastructure Repositories
 
-- Each entity has its own concrete repository.
-- Repositories implement write operations only.
-- Allowed repository methods are `AddAsync`, `UpdateAsync`, and `DeleteAsync`.
+- Standard entity repositories are write-focused and typically expose `AddAsync`, `UpdateAsync`, and `DeleteAsync`.
+- Configuration, state, and schedule repositories may additionally expose focused reads, `UpsertAsync`, and narrow infrastructure support queries needed by orchestration or background work.
 
 # Implementation Rules
 
@@ -19,6 +18,6 @@ alwaysApply: false
 
 # Forbidden Patterns
 
-- Repositories must not expose `GetByIdAsync`, `ListAsync`, or `AnalyzeAsync`.
+- Repositories must not expose generic entity read shapes such as `GetByIdAsync`, `ListAsync`, or `AnalyzeAsync`.
 - Repositories must not contain business rules.
 - Repositories must not return database entities outside `SolarTracker.Infrastructure`.

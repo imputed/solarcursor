@@ -6,10 +6,9 @@ alwaysApply: true
 # Solar Domain Model
 
 - `InstallationSite` is the root location entity and stores name and coordinates.
-- Each `InstallationSite` has one or more `SolarPanel` entities.
-- Each `SolarPanel` has exactly one `TiltMeasuringUnit`.
-- Each `SolarPanel` has exactly one `CurrentMeasuringUnit`.
-- Each `SolarPanel` has one or more `LinearMotor` entities.
+- `InstallationSite` owns a collection of `SolarPanel` entities.
+- `SolarPanel` may have a `TiltMeasuringUnit`, a `CurrentMeasuringUnit`, and a collection of `LinearMotor` entities.
+- Movement operations require a `TiltMeasuringUnit` and at least one `LinearMotor`.
 
 # Hardware Model
 
@@ -20,10 +19,11 @@ alwaysApply: true
 # Domain Constraints
 
 - Tilt values are represented as `readonly record struct TiltMeasurement(double Degrees, DateTime Timestamp)`.
-- Valid tilt ranges are `0` to `90` degrees.
-- Automatic motor movement is allowed only when the absolute delta between measured and target tilt is greater than `1` degree.
+- Tilt-producing components should clamp or validate values to the `0` to `90` degree range.
+- Automatic motor movement uses `SolarTrackingConfiguration.PositionThresholdDegrees`; movement is complete once the absolute delta is less than or equal to the configured threshold.
+- The default movement threshold is `1` degree, but it is configurable per solar panel.
 
-# PVGIS
+# Optimal Position
 
-- The target tilt is determined per installation site using latitude and longitude.
-- PVGIS results must be cached to avoid unnecessary repeated remote calls.
+- The target tilt is determined per installation site using latitude, longitude, and timestamp.
+- Optimal position calculation is delegated through `ISolarOptimalPositionCalculator`.

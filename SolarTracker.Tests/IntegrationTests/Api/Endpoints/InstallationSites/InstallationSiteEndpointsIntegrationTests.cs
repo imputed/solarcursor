@@ -1,7 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using Microsoft.EntityFrameworkCore;
-using SolarTracker.Application.Dtos;
+using SolarTracker.Application.Dtos.InstallationSite;
 using SolarTracker.Infrastructure.Persistence.Entities;
 using SolarTracker.Tests.IntegrationTests.Common;
 

@@ -6,11 +6,12 @@ alwaysApply: false
 
 # C# and Performance Standards
 
-- Code must be Native AOT-ready.
+- Prefer Native AOT-friendly and trim-friendly patterns.
 - Prefer compile-time and source-generated mechanisms over reflection-based runtime behavior.
 - Use file-scoped namespaces.
 - Namespaces must match the physical folder structure of the file.
-- Use one top-level class, interface, enum, record, or struct per file.
+- Use exactly one top-level type per file.
+- Do not place an enum, interface, class, record, or struct beside another top-level type in the same file.
 - If multiple files belong to the same entity, group them in a folder named after that entity.
 
 # Construction and Contracts
@@ -19,6 +20,8 @@ alwaysApply: false
 - Explicit constructors are allowed only for framework behavior, serializer compatibility, inheritance constraints, compiler limitations, or materially better readability.
 - Do not use default values for `CancellationToken`; require the token explicitly.
 - Use `ValueTask` for hot-path I/O contracts when it provides a measurable benefit.
+- Keep function and method declarations inline when they have `5` or fewer parameters and the full declaration remains readable.
+- For short declarations, prefer `public async Task<Result> MoveToOptimumAsync(int id, CancellationToken cancellationToken)` over splitting the parameter list across multiple lines.
 - Write interface method declarations as one-liners, for example `ValueTask<TiltMeasurement> GetCurrentPositionAsync(TiltMeasuringUnit unit, CancellationToken cancellationToken);`.
 
 # API and Quality
@@ -31,5 +34,10 @@ alwaysApply: false
 - Do not force struct conversion for EF entities, API request models, polymorphic hierarchies, shared mutable helpers, or types where `default` struct semantics would change behavior.
 - Prefer short guard clauses and single-line `if` statements without braces when the body is a single short statement and readability stays clear.
 - Write single-line `if` statements in the compact form without braces, for example `if (!validation.IsValid) return validation.ToValidationProblem();`.
+- Do not use ternary operators for normal control flow when a simple `if`/`return` form is clearer.
+- Prefer explicit `if` statements over nested or chained ternary expressions for validation and business-rule decisions.
+- Keep function and method calls inline when they have `5` or fewer parameters and the full call remains readable.
+- For short calls, prefer `await ExecuteMovementAsync(linearMotor, moveUp, configuration.StepDurationMs, steeringCommandReceiver, cancellationToken);` over spreading the arguments across multiple lines.
 - Keep braces for multi-line control flow or when omitting them would reduce clarity.
-- Do not use nullable return values for expected control flow such as success, not found, or business-rule failures; prefer an explicit `Result` pattern.
+- For application services and business outcomes, prefer an explicit `Result` pattern over nullable return values.
+- For simple query-handler lookups such as `GetByIdAsync`, nullable returns are acceptable but only if the caller immediately maps `null` to not-found behavior.

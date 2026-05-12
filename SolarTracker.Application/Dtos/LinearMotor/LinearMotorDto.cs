@@ -1,4 +1,4 @@
-namespace SolarTracker.Application.Dtos;
+namespace SolarTracker.Application.Dtos.LinearMotor;
 
 public sealed record LinearMotorDto(
     int Id,

@@ -1,4 +1,4 @@
-using SolarTracker.Application.Dtos;
+using SolarTracker.Application.Dtos.InstallationSite;
 using SolarTracker.Application.Results;
 
 namespace SolarTracker.Application.Interfaces.Services;
@@ -9,7 +9,7 @@ public interface IInstallationSiteService
 
     ValueTask UpdateAsync(UpdateInstallationSiteDto dto, CancellationToken cancellationToken);
 
-    ValueTask<Result<IReadOnlyList<SolarPanelCurrentPositionDto>>> MoveToOptimumAsync(int id, CancellationToken cancellationToken);
-
     ValueTask DeleteAsync(int id, CancellationToken cancellationToken);
+
+    Task<Result> Optimize(int id, CancellationToken cancellationToken);
 }

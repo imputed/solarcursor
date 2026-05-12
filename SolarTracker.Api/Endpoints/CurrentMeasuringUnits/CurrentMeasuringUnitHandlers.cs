@@ -1,8 +1,6 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
-using SolarTracker.Application.Analysis;
-using SolarTracker.Application.Dtos;
 using SolarTracker.Application.Interfaces.QueryHandlers;
 using SolarTracker.Application.Interfaces.Services;
 using SolarTracker.Application.Mapping;
@@ -11,6 +9,8 @@ using SolarTracker.Api.Infrastructure;
 using SolarTracker.Api.Logging;
 using SolarTracker.Api.Routing;
 using SolarTracker.Domain.Entities;
+using SolarTracker.Application.Dtos.CurrentMeasuringUnit;
+using SolarTracker.Application.Analysis.CurrentMeasuringUnit;
 
 namespace SolarTracker.Api.Endpoints.CurrentMeasuringUnits;
 

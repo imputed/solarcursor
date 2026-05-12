@@ -1,3 +1,3 @@
-namespace SolarTracker.Application.Dtos;
+namespace SolarTracker.Application.Dtos.TiltMeasuringUnit;
 
 public sealed record UpdateTiltMeasuringUnitDto(int Id, int SolarPanelId, string? Name, int GpioPin);

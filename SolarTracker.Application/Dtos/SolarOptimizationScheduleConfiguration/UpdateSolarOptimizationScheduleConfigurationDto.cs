@@ -1,3 +1,3 @@
-namespace SolarTracker.Application.Dtos;
+namespace SolarTracker.Application.Dtos.SolarOptimizationScheduleConfiguration;
 
 public sealed record UpdateSolarOptimizationScheduleConfigurationDto(int IntervalMinutes);

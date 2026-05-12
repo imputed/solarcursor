@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using SolarTracker.Application.Interfaces.Services;
+using SolarTracker.Application.Services;
 
 namespace SolarTracker.IoC;
 

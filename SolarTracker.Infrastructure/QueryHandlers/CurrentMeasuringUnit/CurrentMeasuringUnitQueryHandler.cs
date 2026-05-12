@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using SolarTracker.Application.Analysis;
+using SolarTracker.Application.Analysis.CurrentMeasuringUnit;
 using SolarTracker.Application.Interfaces.QueryHandlers;
 using SolarTracker.Infrastructure.Analysis.CurrentMeasuringUnit;
 using SolarTracker.Infrastructure.Persistence;

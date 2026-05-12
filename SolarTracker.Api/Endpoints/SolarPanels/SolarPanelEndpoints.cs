@@ -1,4 +1,4 @@
-using SolarTracker.Application.Dtos;
+using SolarTracker.Application.Dtos.SolarPanel;
 
 namespace SolarTracker.Api.Endpoints.SolarPanels;
 
@@ -17,11 +17,6 @@ internal static class SolarPanelEndpoints
         group.MapGet("/{id:int}", SolarPanelHandlers.GetByIdAsync)
             .WithName("GetSolarPanelById")
             .Produces<SolarPanelDto>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status404NotFound);
-
-        group.MapGet("/{id:int}/current-position", SolarPanelHandlers.GetCurrentPositionAsync)
-            .WithName("GetSolarPanelCurrentPosition")
-            .Produces<SolarPanelCurrentPositionDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapPost("/", SolarPanelHandlers.CreateAsync)

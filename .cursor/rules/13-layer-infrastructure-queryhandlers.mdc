@@ -6,15 +6,15 @@ alwaysApply: false
 
 # Infrastructure Query Handlers
 
-- Each entity has a dedicated query handler implementation.
-- Allowed query handler methods are `GetByIdAsync` and `AnalyzeAsync`.
+- Each entity or resource with generic read paths has a dedicated query handler implementation.
+- Standard query handler methods are `GetByIdAsync` and `AnalyzeAsync`.
 
 # Read Performance
 
 - Use `AsNoTracking()` for all read-only queries.
 - Prevent N+1 problems through explicit eager loading where required.
 - Use `AsSplitQuery()` for large graph loads with multiple collections.
-- Collection reads must run through `AnalyzeAsync`; do not introduce a separate `ListAsync` path.
+- Collection reads for analyzed resources must run through `AnalyzeAsync`; do not introduce a separate `ListAsync` path for those resources.
 
 # Responsibilities
 

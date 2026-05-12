@@ -1,4 +1,4 @@
-using SolarTracker.Application.Analysis;
+using SolarTracker.Application.Analysis.Common;
 
 namespace SolarTracker.Api.Validation.Analyze;
 

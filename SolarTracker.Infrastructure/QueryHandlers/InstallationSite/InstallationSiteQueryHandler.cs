@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using SolarTracker.Application.Analysis;
+using SolarTracker.Application.Analysis.InstallationSite;
 using SolarTracker.Application.Interfaces.QueryHandlers;
 using SolarTracker.Infrastructure.Analysis.InstallationSite;
 using SolarTracker.Infrastructure.Persistence;

@@ -1,4 +1,4 @@
-using SolarTracker.Application.Analysis;
+using SolarTracker.Application.Analysis.SolarPanel;
 using SolarTracker.Domain.Entities;
 
 namespace SolarTracker.Application.Interfaces.QueryHandlers;

@@ -2,7 +2,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using SolarTracker.Application.Errors;
-using SolarTracker.Application.Dtos;
 using SolarTracker.Application.Interfaces.QueryHandlers;
 using SolarTracker.Application.Interfaces.Repositories;
 using SolarTracker.Application.Interfaces.Services;
@@ -92,12 +91,6 @@ public sealed class SolarPanelOptimizationBackgroundService(
         int installationSiteId,
         CancellationToken cancellationToken)
     {
-        Result<IReadOnlyList<SolarPanelCurrentPositionDto>> result =
-            await installationSiteService.MoveToOptimumAsync(installationSiteId, cancellationToken);
-        return result.IsSuccess
-            ? Result.Success()
-            : result.IsNotFound
-                ? Result.NotFound(result.Error!.Value.Code, result.Error.Value.Message)
-                : Result.Failure(result.Error!.Value.Code, result.Error.Value.Message);
+        return await installationSiteService.Optimize(installationSiteId, cancellationToken);
     }
 }

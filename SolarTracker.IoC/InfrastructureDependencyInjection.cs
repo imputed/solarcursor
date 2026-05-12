@@ -4,7 +4,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SolarTracker.Domain.Abstractions;
 using SolarTracker.IoC.Configuration;
-using SolarTracker.Application.Interfaces.Calculators;
 using SolarTracker.Application.Interfaces.QueryHandlers;
 using SolarTracker.Application.Interfaces.Repositories;
 using SolarTracker.Infrastructure.Calculators;
@@ -46,7 +45,6 @@ public static class DependencyInjection
         services.AddScoped<ILinearMotorQueryHandler, LinearMotorQueryHandler>();
         services.AddScoped<ITiltMeasuringUnitQueryHandler, TiltMeasuringUnitQueryHandler>();
         services.AddScoped<ICurrentMeasuringUnitQueryHandler, CurrentMeasuringUnitQueryHandler>();
-        services.AddScoped<ISolarPanelCalculator, SolarPanelCalculator>();
         services.AddSingleton<ISolarOptimalPositionCalculator, SolarOptimalPositionCalculator>();
         services.AddSingleton(TimeProvider.System);
         services.AddHostedService<SolarPanelOptimizationBackgroundService>();

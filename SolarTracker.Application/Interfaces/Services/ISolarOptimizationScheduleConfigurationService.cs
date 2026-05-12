@@ -1,4 +1,4 @@
-using SolarTracker.Application.Dtos;
+using SolarTracker.Application.Dtos.SolarOptimizationScheduleConfiguration;
 
 namespace SolarTracker.Application.Interfaces.Services;
 

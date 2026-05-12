@@ -1,5 +1,5 @@
 using FluentValidation;
-using SolarTracker.Application.Dtos;
+using SolarTracker.Application.Dtos.SolarPanel;
 
 namespace SolarTracker.Api.Validation.SolarPanels;
 

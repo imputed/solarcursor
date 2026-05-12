@@ -6,15 +6,19 @@ alwaysApply: true
 # SolarTracker Core Architecture
 
 - The solution must follow a strict layered architecture.
+- Prefer domain-driven design when it improves the model and the additional abstraction overhead remains acceptable.
 - `SolarTracker.Domain` must not depend on any other project.
 - `SolarTracker.Application` may depend only on `SolarTracker.Domain`, except for `Microsoft.Extensions.Logging.Abstractions` when using framework logging abstractions.
 - `SolarTracker.Infrastructure` may depend only on `SolarTracker.Application` and `SolarTracker.Domain`.
-- `SolarTracker.Api` must expose transport concerns only and must not contain business logic or persistence logic.
+- `SolarTracker.Api` should stay transport-first and must not contain persistence logic.
+- Reusable business orchestration belongs in `SolarTracker.Application` or `SolarTracker.Domain`; localized endpoint-specific read composition is acceptable when it remains narrow and transport-facing.
 - `SolarTracker.IoC` is the composition root and owns the registration of concrete implementations.
 
 # Dependency Rules
 
 - Do not bypass layer boundaries.
+- Place real business rules and domain behavior on domain entities or value objects when that keeps the design clearer and more cohesive.
+- Do not force DDD patterns when the extra indirection, types, or orchestration cost is disproportionate to the benefit.
 - Do not access Entity Framework types outside `SolarTracker.Infrastructure`.
 - Do not place HTTP, GPIO, OpenAPI, or serialization concerns in `Domain` or `Application`.
 - In `SolarTracker.Application`, allow only logging abstractions and source-generated logging methods from `Microsoft.Extensions.Logging`; do not introduce other infrastructure concerns there.
@@ -22,6 +26,8 @@ alwaysApply: true
 
 # Composition Rules
 
-- Constructor injection is mandatory.
-- Property injection, method injection, and service locator patterns are not allowed.
+- Primary Constructor injection is preferable over old-school Consturctor injection.
+- If a constructor-injected dependency is not used, remove it from the constructor instead of keeping an unused injection.
+- Property injection and method injection are not allowed.
+- Avoid service locator patterns, except when a hosted service creates a scope to resolve scoped dependencies for a single background work item.
 - Keep `Program.cs` minimal and delegate endpoint registration to extension methods.

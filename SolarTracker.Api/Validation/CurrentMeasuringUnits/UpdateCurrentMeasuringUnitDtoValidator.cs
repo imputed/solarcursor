@@ -1,5 +1,5 @@
 using FluentValidation;
-using SolarTracker.Application.Dtos;
+using SolarTracker.Application.Dtos.CurrentMeasuringUnit;
 
 namespace SolarTracker.Api.Validation.CurrentMeasuringUnits;
 

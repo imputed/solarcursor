@@ -1,4 +1,4 @@
-using SolarTracker.Application.Dtos;
+using SolarTracker.Application.Dtos.LinearMotor;
 using SolarTracker.Domain.Entities;
 
 namespace SolarTracker.Application.Mapping;

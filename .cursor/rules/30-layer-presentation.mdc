@@ -6,13 +6,14 @@ alwaysApply: false
 
 # Presentation Layer
 
-- The API layer exposes transport concerns only.
-- Minimal API handlers must remain thin and must not contain business logic.
+- The API layer exposes transport concerns first.
+- Minimal API handlers should remain thin; reusable orchestration belongs outside the handler, but localized endpoint-specific read composition is acceptable when it stays transport-facing.
 
 # Endpoint Rules
 
 - Use `TypedResults` or `Results<T1, ...>` for strongly typed responses.
-- `GET /`, `GET /{id}`, and `POST /analyze` must use the corresponding query handler.
+- Standard entity `GET /{id}` and `POST /analyze` endpoints should use the corresponding query handler.
+- Focused configuration or state read endpoints may use services when that matches the application contract better.
 - `POST`, `PUT`, and `DELETE` must use the corresponding service.
 - Read-after-write and existence checks must use query handlers, not repositories.
 

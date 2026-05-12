@@ -1,8 +1,8 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
-using SolarTracker.Application.Dtos;
 using SolarTracker.Application.Interfaces.Services;
 using SolarTracker.Api.Infrastructure;
+using SolarTracker.Application.Dtos.SolarOptimizationScheduleConfiguration;
 
 namespace SolarTracker.Api.Endpoints.SolarOptimizationScheduleConfiguration;
 
