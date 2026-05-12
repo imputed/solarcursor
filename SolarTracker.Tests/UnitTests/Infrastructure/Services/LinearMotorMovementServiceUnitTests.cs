@@ -1,9 +1,8 @@
 using Microsoft.Extensions.Logging;
 using Moq;
+using SolarTracker.Application.Interfaces.Hardware;
 using SolarTracker.Application.Interfaces.QueryHandlers;
-using SolarTracker.Domain.Abstractions;
 using SolarTracker.Domain.Entities;
-using SolarTracker.Domain.ValueObjects;
 using SolarTracker.Infrastructure.Services;
 
 namespace SolarTracker.Tests.UnitTests.Infrastructure.Services;
@@ -35,7 +34,7 @@ public sealed class LinearMotorMovementServiceUnitTests
         // Assert
         Assert.True(result.IsNotFound);
         Assert.Equal("linear-motor-not-found", result.Error?.Code);
-        actuator.Verify(x => x.MoveUpAsync(It.IsAny<LinearMotorMovementContext>(), It.IsAny<CancellationToken>()), Times.Never);
+        actuator.Verify(x => x.MoveUpAsync(It.IsAny<LinearMotor>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -71,7 +70,7 @@ public sealed class LinearMotorMovementServiceUnitTests
         // Assert
         Assert.True(result.IsNotFound);
         Assert.Equal("solar-panel-not-found", result.Error?.Code);
-        actuator.Verify(x => x.MoveUpAsync(It.IsAny<LinearMotorMovementContext>(), It.IsAny<CancellationToken>()), Times.Never);
+        actuator.Verify(x => x.MoveUpAsync(It.IsAny<LinearMotor>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -103,7 +102,7 @@ public sealed class LinearMotorMovementServiceUnitTests
         // Assert
         Assert.True(result.IsNotFound);
         Assert.Equal("installation-site-not-found", result.Error?.Code);
-        actuator.Verify(x => x.MoveDownAsync(It.IsAny<LinearMotorMovementContext>(), It.IsAny<CancellationToken>()), Times.Never);
+        actuator.Verify(x => x.MoveDownAsync(It.IsAny<LinearMotor>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -142,14 +141,12 @@ public sealed class LinearMotorMovementServiceUnitTests
         Assert.True(result.IsSuccess);
         actuator.Verify(
             x => x.MoveUpAsync(
-                It.Is<LinearMotorMovementContext>(context =>
-                    context.LinearMotorId == 4 &&
-                    context.InstallationSiteId == 12 &&
-                    context.Latitude == 50.123m &&
-                    context.Longitude == 8.456m &&
-                    context.MoveUpGpioPin == 17 &&
-                    context.MoveDownGpioPin == 18 &&
-                    context.DurationMs == 650),
+                It.Is<LinearMotor>(motor =>
+                    motor.Id == 4 &&
+                    motor.SolarPanelId == 9 &&
+                    motor.MoveUpGpioPin == 17 &&
+                    motor.MoveDownGpioPin == 18),
+                650,
                 cancellationToken),
             Times.Once);
     }
@@ -190,14 +187,12 @@ public sealed class LinearMotorMovementServiceUnitTests
         Assert.True(result.IsSuccess);
         actuator.Verify(
             x => x.MoveDownAsync(
-                It.Is<LinearMotorMovementContext>(context =>
-                    context.LinearMotorId == 4 &&
-                    context.InstallationSiteId == 12 &&
-                    context.Latitude == 50.123m &&
-                    context.Longitude == 8.456m &&
-                    context.MoveUpGpioPin == 17 &&
-                    context.MoveDownGpioPin == 18 &&
-                    context.DurationMs == 700),
+                It.Is<LinearMotor>(motor =>
+                    motor.Id == 4 &&
+                    motor.SolarPanelId == 9 &&
+                    motor.MoveUpGpioPin == 17 &&
+                    motor.MoveDownGpioPin == 18),
+                700,
                 cancellationToken),
             Times.Once);
     }

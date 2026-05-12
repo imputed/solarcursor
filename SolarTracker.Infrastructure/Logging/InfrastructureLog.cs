@@ -21,12 +21,12 @@ internal static partial class InfrastructureLog
     [LoggerMessage(EventId = 2003, Level = LogLevel.Error, Message = "Automatic solar panel optimization loop failed.")]
     internal static partial void AutomaticOptimizationLoopFailed(ILogger logger, Exception exception);
 
-    [LoggerMessage(EventId = 2004, Level = LogLevel.Information, Message = "Driving linear motor {LinearMotorId} at installation site {InstallationSiteId} in direction {Direction} using GPIO pin {ActivePin} for {DurationMs} ms.")]
+    [LoggerMessage(EventId = 2004, Level = LogLevel.Information, Message = "Driving linear motor {LinearMotorId} for solar panel {SolarPanelId} in direction {Direction} using GPIO pin {ActivePin} for {DurationMs} ms.")]
     internal static partial void DrivingLinearMotor(
         ILogger logger,
         string direction,
         int linearMotorId,
-        int installationSiteId,
+        int solarPanelId,
         int activePin,
         int durationMs);
 

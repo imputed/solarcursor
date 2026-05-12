@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Logging;
 using SolarTracker.Application.Errors;
+using SolarTracker.Application.Interfaces.Hardware;
 using SolarTracker.Application.Interfaces.QueryHandlers;
 using SolarTracker.Application.Results;
-using SolarTracker.Domain.Abstractions;
 using SolarTracker.Domain.Entities;
 using SolarTracker.Infrastructure.Logging;
 
@@ -28,13 +28,7 @@ public sealed class LinearMotorMovementService(
             return Result.NotFound(error.Code, error.Message);
         }
 
-        await contextResult.Value.LinearMotor.MoveUpAsync(
-            actuator,
-            contextResult.Value.InstallationSite.Id,
-            contextResult.Value.InstallationSite.Latitude,
-            contextResult.Value.InstallationSite.Longitude,
-            durationMs,
-            cancellationToken);
+        await contextResult.Value.LinearMotor.MoveUpAsync(actuator.MoveUpAsync, durationMs, cancellationToken);
         return Result.Success();
     }
 
@@ -51,13 +45,7 @@ public sealed class LinearMotorMovementService(
             return Result.NotFound(error.Code, error.Message);
         }
 
-        await contextResult.Value.LinearMotor.MoveDownAsync(
-            actuator,
-            contextResult.Value.InstallationSite.Id,
-            contextResult.Value.InstallationSite.Latitude,
-            contextResult.Value.InstallationSite.Longitude,
-            durationMs,
-            cancellationToken);
+        await contextResult.Value.LinearMotor.MoveDownAsync(actuator.MoveDownAsync, durationMs, cancellationToken);
         return Result.Success();
     }
 

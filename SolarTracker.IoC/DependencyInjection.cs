@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using SolarTracker.Domain.Abstractions;
 using SolarTracker.IoC.Configuration;
 using SolarTracker.Application.Interfaces.Calculators;
+using SolarTracker.Application.Interfaces.Hardware;
 using SolarTracker.Application.Interfaces.QueryHandlers;
 using SolarTracker.Application.Interfaces.Repositories;
 using SolarTracker.Infrastructure.Calculators;

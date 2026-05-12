@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Moq;
+using SolarTracker.Application.Interfaces.Hardware;
 using SolarTracker.Application.Interfaces.QueryHandlers;
 using SolarTracker.Application.Interfaces.Repositories;
 using SolarTracker.Domain.Abstractions;
@@ -56,9 +57,9 @@ public sealed class SolarPanelCalculatorUnitTests
             .Returns(ValueTask.FromResult<LinearMotor?>(motor1));
         linearMotorQueryHandler.Setup(x => x.GetByIdAsync(2, cancellationToken))
             .Returns(ValueTask.FromResult<LinearMotor?>(null));
-        actuator.Setup(x => x.MoveUpAsync(It.IsAny<LinearMotorMovementContext>(), cancellationToken))
+        actuator.Setup(x => x.MoveUpAsync(It.IsAny<LinearMotor>(), It.IsAny<int>(), cancellationToken))
             .Returns(ValueTask.CompletedTask);
-        actuator.Setup(x => x.MoveDownAsync(It.IsAny<LinearMotorMovementContext>(), cancellationToken))
+        actuator.Setup(x => x.MoveDownAsync(It.IsAny<LinearMotor>(), It.IsAny<int>(), cancellationToken))
             .Returns(ValueTask.CompletedTask);
 
         LinearMotorMovementService movementService = new(
@@ -84,13 +85,13 @@ public sealed class SolarPanelCalculatorUnitTests
         Assert.False(result.IsNotFound);
         Assert.Equal("solar-panel-movement-step-reverted", result.Error?.Code);
         actuator.Verify(
-            x => x.MoveUpAsync(It.Is<LinearMotorMovementContext>(context => context.LinearMotorId == 1), cancellationToken),
+            x => x.MoveUpAsync(It.Is<LinearMotor>(motor => motor.Id == 1), 100, cancellationToken),
             Times.Once);
         actuator.Verify(
-            x => x.MoveDownAsync(It.Is<LinearMotorMovementContext>(context => context.LinearMotorId == 1), cancellationToken),
+            x => x.MoveDownAsync(It.Is<LinearMotor>(motor => motor.Id == 1), 100, cancellationToken),
             Times.Once);
         actuator.Verify(
-            x => x.MoveUpAsync(It.Is<LinearMotorMovementContext>(context => context.LinearMotorId == 2), cancellationToken),
+            x => x.MoveUpAsync(It.Is<LinearMotor>(motor => motor.Id == 2), 100, cancellationToken),
             Times.Never);
     }
 
@@ -138,7 +139,7 @@ public sealed class SolarPanelCalculatorUnitTests
             .Returns(ValueTask.FromResult<LinearMotor?>(null));
         linearMotorQueryHandler.Setup(x => x.GetByIdAsync(2, cancellationToken))
             .Returns(ValueTask.FromResult<LinearMotor?>(null));
-        actuator.Setup(x => x.MoveUpAsync(It.IsAny<LinearMotorMovementContext>(), cancellationToken))
+        actuator.Setup(x => x.MoveUpAsync(It.IsAny<LinearMotor>(), It.IsAny<int>(), cancellationToken))
             .Returns(ValueTask.CompletedTask);
 
         LinearMotorMovementService movementService = new(
@@ -163,10 +164,10 @@ public sealed class SolarPanelCalculatorUnitTests
         Assert.False(result.IsSuccess);
         Assert.Equal("solar-panel-movement-recovery-failed", result.Error?.Code);
         actuator.Verify(
-            x => x.MoveUpAsync(It.Is<LinearMotorMovementContext>(context => context.LinearMotorId == 1), cancellationToken),
+            x => x.MoveUpAsync(It.Is<LinearMotor>(motor => motor.Id == 1), 100, cancellationToken),
             Times.Once);
         actuator.Verify(
-            x => x.MoveDownAsync(It.IsAny<LinearMotorMovementContext>(), cancellationToken),
+            x => x.MoveDownAsync(It.IsAny<LinearMotor>(), It.IsAny<int>(), cancellationToken),
             Times.Never);
     }
 

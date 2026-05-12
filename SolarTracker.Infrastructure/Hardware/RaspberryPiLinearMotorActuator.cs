@@ -1,23 +1,24 @@
 using System.Device.Gpio;
 using Microsoft.Extensions.Logging;
-using SolarTracker.Domain.Abstractions;
-using SolarTracker.Domain.ValueObjects;
+using SolarTracker.Application.Interfaces.Hardware;
+using SolarTracker.Domain.Entities;
 using SolarTracker.Infrastructure.Logging;
 
 namespace SolarTracker.Infrastructure.Hardware;
 
 public sealed class RaspberryPiLinearMotorActuator(ILogger<RaspberryPiLinearMotorActuator> logger) : ILinearMotorActuator
 {
-    public ValueTask MoveUpAsync(LinearMotorMovementContext context, CancellationToken cancellationToken) =>
-        DriveAsync(context, context.MoveUpGpioPin, context.MoveDownGpioPin, "MoveUp", cancellationToken);
+    public ValueTask MoveUpAsync(LinearMotor linearMotor, int durationMs, CancellationToken cancellationToken) =>
+        DriveAsync(linearMotor, linearMotor.MoveUpGpioPin, linearMotor.MoveDownGpioPin, durationMs, "MoveUp", cancellationToken);
 
-    public ValueTask MoveDownAsync(LinearMotorMovementContext context, CancellationToken cancellationToken) =>
-        DriveAsync(context, context.MoveDownGpioPin, context.MoveUpGpioPin, "MoveDown", cancellationToken);
+    public ValueTask MoveDownAsync(LinearMotor linearMotor, int durationMs, CancellationToken cancellationToken) =>
+        DriveAsync(linearMotor, linearMotor.MoveDownGpioPin, linearMotor.MoveUpGpioPin, durationMs, "MoveDown", cancellationToken);
 
     private async ValueTask DriveAsync(
-        LinearMotorMovementContext context,
+        LinearMotor linearMotor,
         int activePin,
         int inactivePin,
+        int durationMs,
         string direction,
         CancellationToken cancellationToken)
     {
@@ -32,16 +33,16 @@ public sealed class RaspberryPiLinearMotorActuator(ILogger<RaspberryPiLinearMoto
         InfrastructureLog.DrivingLinearMotor(
             logger,
             direction,
-            context.LinearMotorId,
-            context.InstallationSiteId,
+            linearMotor.Id,
+            linearMotor.SolarPanelId,
             activePin,
-            context.DurationMs);
+            durationMs);
 
         controller.Write(activePin, PinValue.High);
 
         try
         {
-            await Task.Delay(context.DurationMs, cancellationToken);
+            await Task.Delay(durationMs, cancellationToken);
         }
         finally
         {

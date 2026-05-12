@@ -1,23 +1,23 @@
 using Microsoft.Extensions.Logging;
-using SolarTracker.Domain.Abstractions;
-using SolarTracker.Domain.ValueObjects;
+using SolarTracker.Application.Interfaces.Hardware;
+using SolarTracker.Domain.Entities;
 using SolarTracker.Infrastructure.Logging;
 
 namespace SolarTracker.Infrastructure.Hardware;
 
 public sealed class FakeLinearMotorActuator(ILogger<FakeLinearMotorActuator> logger) : ILinearMotorActuator
 {
-    public async ValueTask MoveUpAsync(LinearMotorMovementContext context, CancellationToken cancellationToken)
+    public async ValueTask MoveUpAsync(LinearMotor linearMotor, int durationMs, CancellationToken cancellationToken)
     {
-        InfrastructureLog.SimulatingMoveUp(logger, context.LinearMotorId, context.MoveUpGpioPin, context.DurationMs);
+        InfrastructureLog.SimulatingMoveUp(logger, linearMotor.Id, linearMotor.MoveUpGpioPin, durationMs);
 
-        await Task.Delay(context.DurationMs, cancellationToken);
+        await Task.Delay(durationMs, cancellationToken);
     }
 
-    public async ValueTask MoveDownAsync(LinearMotorMovementContext context, CancellationToken cancellationToken)
+    public async ValueTask MoveDownAsync(LinearMotor linearMotor, int durationMs, CancellationToken cancellationToken)
     {
-        InfrastructureLog.SimulatingMoveDown(logger, context.LinearMotorId, context.MoveDownGpioPin, context.DurationMs);
+        InfrastructureLog.SimulatingMoveDown(logger, linearMotor.Id, linearMotor.MoveDownGpioPin, durationMs);
 
-        await Task.Delay(context.DurationMs, cancellationToken);
+        await Task.Delay(durationMs, cancellationToken);
     }
 }
